@@ -1,4 +1,4 @@
-package com.javafx.ejercicio4;
+package com.javafx.proyecto;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

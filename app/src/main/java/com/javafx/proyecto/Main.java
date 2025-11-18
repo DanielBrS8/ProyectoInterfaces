@@ -1,4 +1,4 @@
-package com.javafx.ejercicio4;
+package com.javafx.proyecto;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

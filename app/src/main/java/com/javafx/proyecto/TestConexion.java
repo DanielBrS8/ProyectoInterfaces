@@ -1,4 +1,4 @@
-package com.javafx.ejercicio4;
+package com.javafx.proyecto;
 
 public class TestConexion {
     public static void main(String[] args) {

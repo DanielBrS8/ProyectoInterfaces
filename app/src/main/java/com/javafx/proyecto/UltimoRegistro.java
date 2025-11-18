@@ -1,4 +1,4 @@
-package com.javafx.ejercicio4;
+package com.javafx.proyecto;
 public class UltimoRegistro {
     private final String descripcion;
     private final String fecha;
