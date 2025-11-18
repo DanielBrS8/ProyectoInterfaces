@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.javafx.ejercicio4.controlador"
+    prefHeight="650.0" prefWidth="950.0">
+
+    <!-- =================== BARRA SUPERIOR (CRUD) =================== -->
+    <top>
+        <HBox fx:id="barraCrud" prefHeight="54.0" spacing="25.0" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="12.0" right="18.0" bottom="12.0" left="18.0" />
+            </padding>
+            <children>
+                <Button fx:id="btnNuevo" text="Nuevo" contentDisplay="TOP">
+                    <graphic>
+                        <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/nuevo.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button fx:id="btnEditar" text="Editar" contentDisplay="TOP">
+                    <graphic>
+                        <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/editar.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button fx:id="btnEliminar" text="Eliminar" contentDisplay="TOP">
+                    <graphic>
+                        <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/eliminar.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </children>
+        </HBox>
+    </top>
+
+    <!-- =================== MENÚ LATERAL =================== -->
+    <left>
+        <VBox prefHeight="378.0" prefWidth="121.0" spacing="15.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <children>
+                <Button fx:id="btnInicio" contentDisplay="TOP" prefHeight="60.0" prefWidth="137.0"
+                    text="Inicio">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/home.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnUsuarios" contentDisplay="TOP" prefHeight="60.0" prefWidth="135.0"
+                    text="Usuarios">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/usuario.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnMascotas" contentDisplay="TOP" prefHeight="60.0" prefWidth="135.0"
+                    text="Mascotas">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/paw.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnAdopciones" contentDisplay="TOP" prefHeight="60.0"
+                    prefWidth="135.0" text="Adopciones">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/form.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnInformes" contentDisplay="TOP" prefHeight="58.0" prefWidth="119.0"
+                    text="Informes">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/informes.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+
+    <!-- =================== CONTENIDO CENTRAL =================== -->
+    <center>
+        <StackPane fx:id="stackContenido">
+
+            <!-- ===== INICIO / DASHBOARD ===== -->
+            <AnchorPane fx:id="vistaInicio" visible="true">
+                <children>
+
+                    <Label text="Inicio"
+                        layoutX="30" layoutY="10"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <Label text="Bienvenido a PawLink"
+                        layoutX="30" layoutY="40"
+                        style="-fx-font-size: 28px; -fx-font-weight: bold;" />
+
+                    <!-- TARJETAS RESUMEN -->
+                    <HBox layoutX="30" layoutY="90" spacing="20">
+                        <children>
+
+                            <!-- Usuarios activos -->
+                            <VBox prefWidth="180" prefHeight="80"
+                                style="-fx-background-color: #FFFFFF;
+                                         -fx-border-color: #CCCCCC;
+                                         -fx-background-radius:8;
+                                         -fx-border-radius:8;
+                                         -fx-padding:10;">
+                                <children>
+                                    <Label text="Usuarios activos"
+                                        style="-fx-font-weight:bold;" />
+                                    <Label fx:id="lblUsuariosActivos" text="0"
+                                        style="-fx-font-size: 24px;" />
+                                </children>
+                            </VBox>
+
+                            <!-- Mascotas registradas -->
+                            <VBox prefWidth="180" prefHeight="80"
+                                style="-fx-background-color: #FFFFFF;
+                                         -fx-border-color: #CCCCCC;
+                                         -fx-background-radius:8;
+                                         -fx-border-radius:8;
+                                         -fx-padding:10;">
+                                <children>
+                                    <Label text="Mascotas registradas"
+                                        style="-fx-font-weight:bold;" />
+                                    <Label fx:id="lblMascotasRegistradas" text="0"
+                                        style="-fx-font-size: 24px;" />
+                                </children>
+                            </VBox>
+
+                            <!-- Adopciones activas -->
+                            <VBox prefWidth="180" prefHeight="80"
+                                style="-fx-background-color: #FFFFFF;
+                                         -fx-border-color: #CCCCCC;
+                                         -fx-background-radius:8;
+                                         -fx-border-radius:8;
+                                         -fx-padding:10;">
+                                <children>
+                                    <Label text="Adopciones activas"
+                                        style="-fx-font-weight:bold;" />
+                                    <Label fx:id="lblAdopcionesActivas" text="0"
+                                        style="-fx-font-size: 24px;" />
+                                </children>
+                            </VBox>
+
+                        </children>
+                    </HBox>
+
+                    <!-- ÚLTIMOS REGISTROS -->
+                    <Label text="Últimos registros"
+                        layoutX="30" layoutY="190"
+                        style="-fx-font-weight:bold;" />
+
+                    <TableView fx:id="tablaUltimos"
+                        layoutX="30" layoutY="215"
+                        prefWidth="320" prefHeight="280">
+                        <columns>
+                            <TableColumn fx:id="colUltimoDescripcion"
+                                text="Registro" prefWidth="200" />
+                            <TableColumn fx:id="colUltimoFecha"
+                                text="Fecha" prefWidth="120" />
+                        </columns>
+                    </TableView>
+
+                    <!-- GRÁFICA ADOPCIONES POR ESPECIE -->
+                    <BarChart fx:id="graficaEspecies"
+                        layoutX="380" layoutY="215"
+                        prefWidth="360" prefHeight="280">
+                        <xAxis>
+                            <CategoryAxis label="Especie" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Número de adopciones" />
+                        </yAxis>
+                    </BarChart>
+
+                </children>
+            </AnchorPane>
+
+
+            <!-- ===== USUARIOS ===== -->
+            <AnchorPane fx:id="vistaUsuarios" visible="false">
+                <children>
+                    <Label text="👥 Gestión de Usuarios"
+                        layoutX="30" layoutY="20" />
+
+                    <!-- Filtros -->
+                    <HBox layoutX="30" layoutY="60" spacing="10">
+                        <children>
+                            <TextField fx:id="txtBuscarUsuarioId" promptText="Buscar ID"
+                                prefWidth="80" />
+                            <TextField fx:id="txtBuscarUsuarioNombre" promptText="Nombre"
+                                prefWidth="140" />
+                            <TextField fx:id="txtBuscarUsuarioEmail" promptText="Email"
+                                prefWidth="180" />
+                            <TextField fx:id="txtBuscarUsuarioTelefono" promptText="Teléfono"
+                                prefWidth="120" />
+                            <Button fx:id="btnBuscarUsuario" text="Buscar" />
+                        </children>
+                    </HBox>
+
+                    <!-- Tabla Usuarios = tabla usuarios de MySQL -->
+                    <TableView fx:id="tablaUsuarios"
+                        layoutX="30" layoutY="110"
+                        prefHeight="430" prefWidth="740">
+                        <columns>
+                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
+                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="150" />
+                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioTelefono" text="Teléfono" prefWidth="120" />
+                            <TableColumn fx:id="colUsuarioDireccion" text="Dirección"
+                                prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="80" />
+                        </columns>
+                    </TableView>
+                </children>
+            </AnchorPane>
+
+            <!-- ===== MASCOTAS ===== -->
+            <AnchorPane fx:id="vistaMascotas" visible="false">
+                <children>
+                    <Label text="🐾 Gestión de Mascotas"
+                        layoutX="30" layoutY="20" />
+
+                    <!-- Filtros -->
+                    <HBox layoutX="30" layoutY="60" spacing="10">
+                        <children>
+                            <TextField fx:id="txtBuscarMascotaId" promptText="Buscar ID"
+                                prefWidth="80" />
+                            <TextField fx:id="txtBuscarMascotaNombre" promptText="Nombre"
+                                prefWidth="140" />
+                            <TextField fx:id="txtBuscarMascotaEspecie" promptText="Especie"
+                                prefWidth="120" />
+                            <TextField fx:id="txtBuscarMascotaRaza" promptText="Raza"
+                                prefWidth="140" />
+                            <Button fx:id="btnBuscarMascota" text="Buscar" />
+                        </children>
+                    </HBox>
+
+                    <!-- Tabla Mascotas = tabla mascotas de MySQL -->
+                    <TableView fx:id="tablaMascotas"
+                        layoutX="30" layoutY="110"
+                        prefHeight="430" prefWidth="740">
+                        <columns>
+                            <TableColumn fx:id="colMascotaId" text="ID" prefWidth="60" />
+                            <TableColumn fx:id="colMascotaNombre" text="Nombre" prefWidth="130" />
+                            <TableColumn fx:id="colMascotaEspecie" text="Especie" prefWidth="110" />
+                            <TableColumn fx:id="colMascotaRaza" text="Raza" prefWidth="140" />
+                            <TableColumn fx:id="colMascotaFechaNac" text="F. nacimiento"
+                                prefWidth="110" />
+                            <TableColumn fx:id="colMascotaPeso" text="Peso (kg)" prefWidth="80" />
+                            <TableColumn fx:id="colMascotaEstadoSalud" text="Estado salud"
+                                prefWidth="150" />
+                            <TableColumn fx:id="colMascotaDisponible" text="Disponible"
+                                prefWidth="90" />
+                        </columns>
+                    </TableView>
+                </children>
+            </AnchorPane>
+
+            <!-- ===== ADOPCIONES (Adopcion_Temporal / alquiler) ===== -->
+            <AnchorPane fx:id="vistaAdopciones" visible="false">
+                <children>
+                    <Label text="📋 Gestión de Adopciones"
+                        layoutX="30" layoutY="20" />
+
+                    <!-- Filtros -->
+                    <HBox layoutX="30" layoutY="60" spacing="10">
+                        <children>
+                            <TextField fx:id="txtBuscarAdopcionId" promptText="Buscar ID"
+                                prefWidth="80" />
+                            <TextField fx:id="txtBuscarAdopcionMascota" promptText="Mascota"
+                                prefWidth="140" />
+                            <TextField fx:id="txtBuscarAdopcionVoluntario" promptText="Voluntario"
+                                prefWidth="140" />
+                            <TextField fx:id="txtBuscarAdopcionEstado" promptText="Estado"
+                                prefWidth="120" />
+                            <Button fx:id="btnBuscarAdopcion" text="Buscar" />
+                        </children>
+                    </HBox>
+
+                    <!-- Tabla Adopciones = tabla alquiler/adopcion_temporal -->
+                    <TableView fx:id="tablaAdopciones"
+                        layoutX="30" layoutY="110"
+                        prefHeight="430" prefWidth="740">
+                        <columns>
+                            <!-- id_alquiler -->
+                            <TableColumn fx:id="colAdopcionId" text="ID" prefWidth="60" />
+                            <!-- id_mascota (mostrado como nombre en el futuro) -->
+                            <TableColumn fx:id="colAdopcionMascota" text="Mascota" prefWidth="140" />
+                            <!-- id_voluntario (mostrado como nombre en el futuro) -->
+                            <TableColumn fx:id="colAdopcionVoluntario" text="Voluntario"
+                                prefWidth="140" />
+                            <!-- fechas -->
+                            <TableColumn fx:id="colAdopcionFechaInicio" text="F. inicio"
+                                prefWidth="100" />
+                            <TableColumn fx:id="colAdopcionFechaFin" text="F. fin" prefWidth="100" />
+                            <!-- estado (enum pendiente, activo, finalizado, cancelado...) -->
+                            <TableColumn fx:id="colAdopcionEstado" text="Estado" prefWidth="100" />
+                            <!-- calificacion -->
+                            <TableColumn fx:id="colAdopcionCalificacion" text="Calificación"
+                                prefWidth="100" />
+                        </columns>
+                    </TableView>
+                </children>
+            </AnchorPane>
+
+            <!-- ===== INFORMES ===== -->
+            <AnchorPane fx:id="vistaInformes" visible="false">
+                <children>
+
+                    <Label text="Informes"
+                        layoutX="30" layoutY="10"
+                        style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+
+                    <Label text="Contratos de adopción"
+                        layoutX="30" layoutY="40"
+                        style="-fx-font-weight:bold;" />
+
+                    <Label text="Rango de fechas"
+                        layoutX="30" layoutY="65" />
+
+                    <!-- RANGO DE FECHAS -->
+                    <HBox layoutX="30" layoutY="90" spacing="10">
+                        <children>
+                            <DatePicker fx:id="dpInformeDesde" promptText="Desde" />
+                            <DatePicker fx:id="dpInformeHasta" promptText="Hasta" />
+                        </children>
+                    </HBox>
+
+                    <!-- SELECCIONAR MASCOTA / USUARIO -->
+                    <HBox layoutX="30" layoutY="135" spacing="20">
+                        <children>
+                            <VBox spacing="5">
+                                <children>
+                                    <Label text="Seleccionar mascota" />
+                                    <ComboBox fx:id="comboInformeMascota"
+                                        prefWidth="200"
+                                        promptText="Seleccionar mascota" />
+                                </children>
+                            </VBox>
+
+                            <VBox spacing="5">
+                                <children>
+                                    <Label text="Seleccionar usuario" />
+                                    <ComboBox fx:id="comboInformeUsuario"
+                                        prefWidth="200"
+                                        promptText="Seleccionar usuario" />
+                                </children>
+                            </VBox>
+
+                            <Button fx:id="btnBuscarInformes" text="Buscar"
+                                prefHeight="32"
+                                style="-fx-background-color:#276FBF;
+                                           -fx-text-fill:white;" />
+                        </children>
+                    </HBox>
+
+                    <!-- TABLA CONTRATOS -->
+                    <TableView fx:id="tablaInformes"
+                        layoutX="30" layoutY="190"
+                        prefHeight="300" prefWidth="740">
+                        <columns>
+                            <TableColumn fx:id="colInformeFechaInicio"
+                                text="Fecha inicio" prefWidth="110" />
+                            <TableColumn fx:id="colInformeFechaFin"
+                                text="Fecha fin" prefWidth="110" />
+                            <TableColumn fx:id="colInformeMascota"
+                                text="Mascota" prefWidth="160" />
+                            <TableColumn fx:id="colInformeUsuario"
+                                text="Usuario" prefWidth="160" />
+                            <TableColumn fx:id="colInformeEstado"
+                                text="Estado" prefWidth="100" />
+                            <TableColumn fx:id="colInformeContrato"
+                                text="Contrato" prefWidth="100" />
+                        </columns>
+                    </TableView>
+
+                    <!-- BOTONES INFERIORES -->
+                    <HBox layoutX="30" layoutY="510" spacing="10">
+                        <children>
+                            <Button fx:id="btnExportarPdf" text="Exportar todo a PDF" />
+                            <Button fx:id="btnExportarExcel" text="Exportar a Excel" />
+                            <Button fx:id="btnBuscarContratos" text="Buscar contratos" />
+                        </children>
+                    </HBox>
+
+                </children>
+            </AnchorPane>
+
+
+        </StackPane>
+    </center>
+</BorderPane>
