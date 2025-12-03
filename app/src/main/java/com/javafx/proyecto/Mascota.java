@@ -57,4 +57,11 @@ public class Mascota {
     public Boolean getDisponible() {
         return disponible;
     }
+
+    @Override
+    public String toString() {
+        
+        return nombre + " (" + especie + ")";
+        
+    }
 }

@@ -42,4 +42,10 @@ public class Usuario {
     public Boolean getActivo() {
         return activo;
     }
+
+    @Override
+    public String toString() {
+        
+        return nombre + " - " + email;
+    }
 }

@@ -11,7 +11,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Login.fxml está en src/main/resources/Login.fxml
+        
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
         Scene scene = new Scene(loader.load());
 
