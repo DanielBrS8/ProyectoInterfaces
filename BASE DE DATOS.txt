@@ -1,0 +1,80 @@
+-- Seleccionar base de datos
+USE Veterinario;
+-- Eliminar tablas si existen
+DROP TABLE IF EXISTS Alquileres;
+DROP TABLE IF EXISTS Mascotas;
+DROP TABLE IF EXISTS Usuarios;
+-----------------------------------------
+-- TABLA: USUARIOS
+-----------------------------------------
+CREATE TABLE Usuarios (
+id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(100) NOT NULL,
+email VARCHAR(150) NOT NULL,
+telefono VARCHAR(20),
+direccion VARCHAR(200),
+rol VARCHAR(50) DEFAULT 'voluntario',
+activo TINYINT(1) NOT NULL DEFAULT 1,
+fecha_registro DATE NOT NULL DEFAULT '2025-01-01'
+);
+-----------------------------------------
+-- TABLA: MASCOTAS
+-----------------------------------------
+CREATE TABLE Mascotas (
+id_mascota INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(100) NOT NULL,
+especie VARCHAR(50) NOT NULL,
+raza VARCHAR(100),
+fecha_nacimiento DATE,
+peso DECIMAL(5,2),
+estado_salud VARCHAR(100),
+disponible_alquiler TINYINT(1) NOT NULL DEFAULT 1,
+fecha_creacion DATE NOT NULL DEFAULT '2025-01-01'
+);
+-----------------------------------------
+-- TABLA: ALQUILERES / ADOPCIONES
+-----------------------------------------
+CREATE TABLE Alquileres (
+id_alquiler INT AUTO_INCREMENT PRIMARY KEY,
+id_mascota INT NOT NULL,
+id_voluntario INT NOT NULL,
+fecha_inicio DATE NOT NULL,
+fecha_fin DATE,
+estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+calificacion INT,
+CONSTRAINT fk_alq_mascota
+FOREIGN KEY (id_mascota) REFERENCES Mascotas(id_mascota),
+CONSTRAINT fk_alq_usuario
+FOREIGN KEY (id_voluntario) REFERENCES Usuarios(id_usuario)
+);
+-----------------------------------------
+-- INSERTS DE USUARIOS
+-----------------------------------------
+INSERT INTO Usuarios (nombre, email, telefono, direccion, rol, activo, fecha_registro)
+VALUES
+('Ana López', 'ana@example.com', '600111222', 'C/ Sol 1, Granada', 'voluntario',
+1, '2025-10-01'),
+('Carlos Martín', 'carlos@example.com','600333444', 'Av. Andalucía 23, Granada',
+'administrador', 1, '2025-10-05'),
+('María Pérez', 'maria@example.com', '600555666', 'C/ Luna 7, Granada',
+'voluntario', 1, '2025-10-10'),
+('Juan Gómez', 'juan@example.com', '600777888', 'C/ Río 12, Granada',
+'voluntario', 0, '2025-10-15');
+-----------------------------------------
+-- INSERTS DE MASCOTAS
+-----------------------------------------
+INSERT INTO Mascotas (nombre, especie, raza, fecha_nacimiento, peso, estado_salud,
+disponible_alquiler, fecha_creacion) VALUES
+('Luna', 'Perro', 'Pastor Alemán', '2021-03-10', 25.5, 'Buena', 1, '2025-10-20'),
+('Misu', 'Gato', 'Común europeo', '2022-05-01', 4.2, 'Buena', 1, '2025-10-21'),
+('Rocky', 'Perro', 'Boxer', '2020-11-15', 28.0, 'Regular', 1, '2025-10-22'),
+('Nube', 'Conejo','Enano', '2023-01-05', 1.8, 'Buena', 0, '2025-10-23'),
+('Toby', 'Perro', 'Mestizo', '2019-07-19', 18.3, 'Delicada', 1, '2025-10-24');
+-----------------------------------------
+-- INSERTS DE ALQUILERES
+-----------------------------------------
+INSERT INTO Alquileres (id_mascota, id_voluntario, fecha_inicio, fecha_fin, estado,
+calificacion) VALUES
+(1, 1, '2025-11-01', '2025-11-10', 'finalizado', 5),
+(2, 3, '2025-11-05', NULL, 'activo', NULL),
+(5, 2, '2025-11-03', '2025-11-12', 'finalizado', 4);
