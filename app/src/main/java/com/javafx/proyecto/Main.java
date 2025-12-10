@@ -19,6 +19,7 @@ public class Main extends Application {
         stage.getIcons().add(
                 new Image(getClass().getResourceAsStream("/miapp/icons/paw.png")));
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 

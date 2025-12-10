@@ -9,16 +9,17 @@
 <BorderPane xmlns="http://javafx.com/javafx/25"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="com.javafx.proyecto.controlador"
-    prefHeight="650.0" prefWidth="950.0">
+    prefHeight="650.0" prefWidth="950.0"
+    stylesheets="@styles.css">
 
-    <!-- =================== BARRA SUPERIOR (CRUD) =================== -->
     <top>
-        <HBox fx:id="barraCrud" prefHeight="54.0" spacing="25.0" alignment="CENTER_LEFT">
+        <HBox fx:id="barraCrud" prefHeight="54.0" spacing="25.0" alignment="CENTER_LEFT"
+            visible="true" managed="true">
             <padding>
                 <Insets top="12.0" right="18.0" bottom="12.0" left="18.0" />
             </padding>
             <children>
-                <Button fx:id="btnNuevo" text="Nuevo" contentDisplay="TOP">
+                <Button fx:id="btnNuevo" text="_Nuevo" contentDisplay="TOP">
                     <graphic>
                         <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
                             <image>
@@ -27,7 +28,7 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <Button fx:id="btnEditar" text="Editar" contentDisplay="TOP">
+                <Button fx:id="btnEditar" text="_Editar" contentDisplay="TOP">
                     <graphic>
                         <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
                             <image>
@@ -36,7 +37,7 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <Button fx:id="btnEliminar" text="Eliminar" contentDisplay="TOP">
+                <Button fx:id="btnEliminar" text="E_liminar" contentDisplay="TOP">
                     <graphic>
                         <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
                             <image>
@@ -49,15 +50,14 @@
         </HBox>
     </top>
 
-    <!-- =================== MENÚ LATERAL =================== -->
     <left>
-        <VBox prefHeight="378.0" prefWidth="121.0" spacing="15.0">
+        <VBox prefHeight="378.0" prefWidth="150.0" spacing="15.0">
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
             </padding>
             <children>
-                <Button fx:id="btnInicio" contentDisplay="TOP" prefHeight="60.0" prefWidth="137.0"
-                    text="Inicio">
+                <Button fx:id="btnInicio" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="_Inicio" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
@@ -67,8 +67,8 @@
                     </graphic>
                 </Button>
 
-                <Button fx:id="btnUsuarios" contentDisplay="TOP" prefHeight="60.0" prefWidth="135.0"
-                    text="Usuarios">
+                <Button fx:id="btnUsuarios" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="_Usuarios" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
@@ -78,8 +78,8 @@
                     </graphic>
                 </Button>
 
-                <Button fx:id="btnMascotas" contentDisplay="TOP" prefHeight="60.0" prefWidth="135.0"
-                    text="Mascotas">
+                <Button fx:id="btnMascotas" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="_Mascotas" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
@@ -90,7 +90,7 @@
                 </Button>
 
                 <Button fx:id="btnAdopciones" contentDisplay="TOP" prefHeight="60.0"
-                    prefWidth="135.0" text="Adopciones">
+                    prefWidth="150.0" text="_Adopciones" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
@@ -100,8 +100,8 @@
                     </graphic>
                 </Button>
 
-                <Button fx:id="btnInformes" contentDisplay="TOP" prefHeight="58.0" prefWidth="119.0"
-                    text="Informes">
+                <Button fx:id="btnInformes" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="I_nformes" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
@@ -114,11 +114,9 @@
         </VBox>
     </left>
 
-    <!-- =================== CONTENIDO CENTRAL =================== -->
     <center>
         <StackPane fx:id="stackContenido">
 
-            <!-- ===== INICIO / DASHBOARD ===== -->
             <AnchorPane fx:id="vistaInicio" visible="true">
                 <children>
 
@@ -130,11 +128,9 @@
                         layoutX="30" layoutY="40"
                         style="-fx-font-size: 28px; -fx-font-weight: bold;" />
 
-                    <!-- TARJETAS RESUMEN -->
                     <HBox layoutX="30" layoutY="90" spacing="20">
                         <children>
 
-                            <!-- Usuarios activos -->
                             <VBox prefWidth="180" prefHeight="80"
                                 style="-fx-background-color: #FFFFFF;
                                          -fx-border-color: #CCCCCC;
@@ -149,7 +145,6 @@
                                 </children>
                             </VBox>
 
-                            <!-- Mascotas registradas -->
                             <VBox prefWidth="180" prefHeight="80"
                                 style="-fx-background-color: #FFFFFF;
                                          -fx-border-color: #CCCCCC;
@@ -164,7 +159,6 @@
                                 </children>
                             </VBox>
 
-                            <!-- Adopciones activas -->
                             <VBox prefWidth="180" prefHeight="80"
                                 style="-fx-background-color: #FFFFFF;
                                          -fx-border-color: #CCCCCC;
@@ -182,7 +176,6 @@
                         </children>
                     </HBox>
 
-                    <!-- ÚLTIMOS REGISTROS -->
                     <Label text="Últimos registros"
                         layoutX="30" layoutY="190"
                         style="-fx-font-weight:bold;" />
@@ -198,7 +191,6 @@
                         </columns>
                     </TableView>
 
-                    <!-- GRÁFICA ADOPCIONES POR ESPECIE -->
                     <BarChart fx:id="graficaEspecies"
                         layoutX="380" layoutY="215"
                         prefWidth="360" prefHeight="280">
@@ -214,31 +206,34 @@
             </AnchorPane>
 
 
-            <!-- ===== USUARIOS ===== -->
             <AnchorPane fx:id="vistaUsuarios" visible="false">
                 <children>
-                    <Label text="👥 Gestión de Usuarios"
-                        layoutX="30" layoutY="20" />
+                    <Label text="Gestión de Usuarios"
+                        layoutX="30" layoutY="20"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
-                    <!-- Filtros -->
                     <HBox layoutX="30" layoutY="60" spacing="10">
                         <children>
-                            <TextField fx:id="txtBuscarUsuarioId" promptText="Buscar ID"
-                                prefWidth="80" />
-                            <TextField fx:id="txtBuscarUsuarioNombre" promptText="Nombre"
-                                prefWidth="140" />
-                            <TextField fx:id="txtBuscarUsuarioEmail" promptText="Email"
-                                prefWidth="180" />
-                            <TextField fx:id="txtBuscarUsuarioTelefono" promptText="Teléfono"
-                                prefWidth="120" />
-                            <Button fx:id="btnBuscarUsuario" text="Buscar" />
+                            <ComboBox fx:id="comboBuscarUsuarioNombre" promptText="Buscar por nombre"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarUsuarioEmail" promptText="Buscar por email"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarUsuarioTelefono" promptText="Buscar por teléfono"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarUsuarioDireccion" promptText="Buscar por dirección"
+                                prefWidth="140" editable="true" />
+                            <Button fx:id="btnLimpiarUsuarios" text="_Buscar" mnemonicParsing="true" />
                         </children>
                     </HBox>
 
-                    <!-- Tabla Usuarios = tabla usuarios de MySQL -->
+                    <Label fx:id="lblErrorConexionUsuarios" text="⚠ Error: No se pudo conectar a la base de datos"
+                        layoutX="30" layoutY="100"
+                        style="-fx-font-size: 13px; -fx-text-fill: #d32f2f; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 8px; -fx-border-color: #d32f2f; -fx-border-width: 1px;"
+                        visible="false" managed="false" />
+
                     <TableView fx:id="tablaUsuarios"
-                        layoutX="30" layoutY="110"
-                        prefHeight="430" prefWidth="740">
+                        layoutX="30" layoutY="140"
+                        prefHeight="400" prefWidth="740">
                         <columns>
                             <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
                             <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="150" />
@@ -252,31 +247,34 @@
                 </children>
             </AnchorPane>
 
-            <!-- ===== MASCOTAS ===== -->
             <AnchorPane fx:id="vistaMascotas" visible="false">
                 <children>
-                    <Label text="🐾 Gestión de Mascotas"
-                        layoutX="30" layoutY="20" />
+                    <Label text="Gestión de Mascotas"
+                        layoutX="30" layoutY="20"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
-                    <!-- Filtros -->
                     <HBox layoutX="30" layoutY="60" spacing="10">
                         <children>
-                            <TextField fx:id="txtBuscarMascotaId" promptText="Buscar ID"
-                                prefWidth="80" />
-                            <TextField fx:id="txtBuscarMascotaNombre" promptText="Nombre"
-                                prefWidth="140" />
-                            <TextField fx:id="txtBuscarMascotaEspecie" promptText="Especie"
-                                prefWidth="120" />
-                            <TextField fx:id="txtBuscarMascotaRaza" promptText="Raza"
-                                prefWidth="140" />
-                            <Button fx:id="btnBuscarMascota" text="Buscar" />
+                            <ComboBox fx:id="comboBuscarMascotaNombre" promptText="Buscar por nombre"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarMascotaEspecie" promptText="Buscar por especie"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarMascotaRaza" promptText="Buscar por raza"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarMascotaEstadoSalud" promptText="Buscar por estado salud"
+                                prefWidth="140" editable="true" />
+                            <Button fx:id="btnLimpiarMascotas" text="_Buscar" mnemonicParsing="true" />
                         </children>
                     </HBox>
 
-                    <!-- Tabla Mascotas = tabla mascotas de MySQL -->
+                    <Label fx:id="lblErrorConexionMascotas" text="⚠ Error: No se pudo conectar a la base de datos"
+                        layoutX="30" layoutY="100"
+                        style="-fx-font-size: 13px; -fx-text-fill: #d32f2f; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 8px; -fx-border-color: #d32f2f; -fx-border-width: 1px;"
+                        visible="false" managed="false" />
+
                     <TableView fx:id="tablaMascotas"
-                        layoutX="30" layoutY="110"
-                        prefHeight="430" prefWidth="740">
+                        layoutX="30" layoutY="140"
+                        prefHeight="400" prefWidth="740">
                         <columns>
                             <TableColumn fx:id="colMascotaId" text="ID" prefWidth="60" />
                             <TableColumn fx:id="colMascotaNombre" text="Nombre" prefWidth="130" />
@@ -294,46 +292,43 @@
                 </children>
             </AnchorPane>
 
-            <!-- ===== ADOPCIONES (Adopcion_Temporal / alquiler) ===== -->
             <AnchorPane fx:id="vistaAdopciones" visible="false">
                 <children>
-                    <Label text="📋 Gestión de Adopciones"
-                        layoutX="30" layoutY="20" />
+                    <Label text="Gestión de Adopciones"
+                        layoutX="30" layoutY="20"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
-                    <!-- Filtros -->
                     <HBox layoutX="30" layoutY="60" spacing="10">
                         <children>
-                            <TextField fx:id="txtBuscarAdopcionId" promptText="Buscar ID"
-                                prefWidth="80" />
-                            <TextField fx:id="txtBuscarAdopcionMascota" promptText="Mascota"
-                                prefWidth="140" />
-                            <TextField fx:id="txtBuscarAdopcionVoluntario" promptText="Voluntario"
-                                prefWidth="140" />
-                            <TextField fx:id="txtBuscarAdopcionEstado" promptText="Estado"
-                                prefWidth="120" />
-                            <Button fx:id="btnBuscarAdopcion" text="Buscar" />
+                            <ComboBox fx:id="comboBuscarAdopcionMascota" promptText="Buscar por mascota"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarAdopcionVoluntario" promptText="Buscar por voluntario"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarAdopcionEstado" promptText="Buscar por estado"
+                                prefWidth="140" editable="true" />
+                            <ComboBox fx:id="comboBuscarAdopcionCalificacion" promptText="Buscar por calificación"
+                                prefWidth="140" editable="true" />
+                            <Button fx:id="btnLimpiarAdopciones" text="_Buscar" mnemonicParsing="true" />
                         </children>
                     </HBox>
 
-                    <!-- Tabla Adopciones = tabla alquiler/adopcion_temporal -->
+                    <Label fx:id="lblErrorConexionAdopciones" text="⚠ Error: No se pudo conectar a la base de datos"
+                        layoutX="30" layoutY="100"
+                        style="-fx-font-size: 13px; -fx-text-fill: #d32f2f; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 8px; -fx-border-color: #d32f2f; -fx-border-width: 1px;"
+                        visible="false" managed="false" />
+
                     <TableView fx:id="tablaAdopciones"
-                        layoutX="30" layoutY="110"
-                        prefHeight="430" prefWidth="740">
+                        layoutX="30" layoutY="140"
+                        prefHeight="400" prefWidth="740">
                         <columns>
-                            <!-- id_alquiler -->
                             <TableColumn fx:id="colAdopcionId" text="ID" prefWidth="60" />
-                            <!-- id_mascota (mostrado como nombre en el futuro) -->
                             <TableColumn fx:id="colAdopcionMascota" text="Mascota" prefWidth="140" />
-                            <!-- id_voluntario (mostrado como nombre en el futuro) -->
                             <TableColumn fx:id="colAdopcionVoluntario" text="Voluntario"
                                 prefWidth="140" />
-                            <!-- fechas -->
                             <TableColumn fx:id="colAdopcionFechaInicio" text="F. inicio"
                                 prefWidth="100" />
                             <TableColumn fx:id="colAdopcionFechaFin" text="F. fin" prefWidth="100" />
-                            <!-- estado (enum pendiente, activo, finalizado, cancelado...) -->
                             <TableColumn fx:id="colAdopcionEstado" text="Estado" prefWidth="100" />
-                            <!-- calificacion -->
                             <TableColumn fx:id="colAdopcionCalificacion" text="Calificación"
                                 prefWidth="100" />
                         </columns>
@@ -341,7 +336,6 @@
                 </children>
             </AnchorPane>
 
-            <!-- ===== INFORMES ===== -->
             <AnchorPane fx:id="vistaInformes" visible="false">
                 <children>
 
@@ -356,7 +350,6 @@
                     <Label text="Rango de fechas"
                         layoutX="30" layoutY="65" />
 
-                    <!-- RANGO DE FECHAS -->
                     <HBox layoutX="30" layoutY="90" spacing="10">
                         <children>
                             <DatePicker fx:id="dpInformeDesde" promptText="Desde" />
@@ -364,7 +357,6 @@
                         </children>
                     </HBox>
 
-                    <!-- SELECCIONAR MASCOTA / USUARIO -->
                     <HBox layoutX="30" layoutY="135" spacing="20">
                         <children>
                             <VBox spacing="5">
@@ -392,7 +384,6 @@
                         </children>
                     </HBox>
 
-                    <!-- TABLA CONTRATOS -->
                     <TableView fx:id="tablaInformes"
                         layoutX="30" layoutY="190"
                         prefHeight="300" prefWidth="740">
@@ -412,7 +403,6 @@
                         </columns>
                     </TableView>
 
-                    <!-- BOTONES INFERIORES -->
                     <HBox layoutX="30" layoutY="510" spacing="10">
                         <children>
                             <Button fx:id="btnExportarPdf" text="Exportar todo a PDF" />
