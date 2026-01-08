@@ -3,7 +3,8 @@
     "allow": [
       "Bash(javac:*)",
       "Bash(gradlew build:*)",
-      "Bash(./gradlew build:*)"
+      "Bash(./gradlew build:*)",
+      "Bash(.gradlew.bat run:*)"
     ]
   }
 }

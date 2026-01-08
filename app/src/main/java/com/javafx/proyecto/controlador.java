@@ -985,8 +985,8 @@ public class controlador {
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
 
-            Mascota m = comboMascota.getValue();
-            Usuario u = comboVoluntario.getValue();
+            Mascota m = comboMascota.getSelectionModel().getSelectedItem();
+            Usuario u = comboVoluntario.getSelectionModel().getSelectedItem();
 
             if (m == null || u == null) {
                 mostrarInfo("Datos incompletos", "Selecciona una mascota y un voluntario.");
@@ -1318,6 +1318,26 @@ public class controlador {
         FilteredList<T> filteredItems = new FilteredList<>(items, p -> true);
         combo.setItems(filteredItems);
         combo.setEditable(true);
+
+        // Converter para que JavaFX sepa convertir entre String y objeto T
+        combo.setConverter(new javafx.util.StringConverter<T>() {
+            @Override
+            public String toString(T object) {
+                return object == null ? "" : object.toString();
+            }
+
+            @Override
+            public T fromString(String string) {
+                if (string == null || string.trim().isEmpty()) {
+                    return null;
+                }
+                // Buscar el objeto en la lista que coincida con el texto
+                return items.stream()
+                        .filter(item -> item.toString().equals(string))
+                        .findFirst()
+                        .orElse(null);
+            }
+        });
 
         TextField editor = combo.getEditor();
 
