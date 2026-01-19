@@ -15,13 +15,18 @@ javafx {
         'javafx.controls',
         'javafx.fxml',
         'javafx.swing',
-        'javafx.media'
+        'javafx.media',
+        'javafx.web'
     ]
 }
 
 dependencies {
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.2'
     implementation 'org.controlsfx:controlsfx:11.2.2'
+    implementation 'net.sf.jasperreports:jasperreports:7.0.1'
+    implementation 'net.sf.jasperreports:jasperreports-pdf:7.0.1'
+    implementation 'net.sf.jasperreports:jasperreports-charts:7.0.1'
+    implementation 'net.sf.jasperreports:jasperreports-jdt:7.0.1'
 }
 
 java {
@@ -38,7 +43,7 @@ sourceSets {
     main {
         resources {
             srcDirs = ["src/main/resources"]
-            includes = ["**/*.fxml","**/*.css","**/*.png","**/*.properties"]
+            includes = ["**/*.fxml","**/*.css","**/*.png","**/*.properties","**/*.jasper","**/*.jrxml"]
         }
     }
 }

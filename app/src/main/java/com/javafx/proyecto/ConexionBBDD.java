@@ -5,12 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionBBDD {
-    private static final String URL =
-            "jdbc:mysql://127.0.0.1:3306/Veterinario" +
+
+    private static final String URL = "jdbc:mariadb://127.0.0.1:3306/Veterinario" +
             "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8";
 
-    private static final String USER = "vetuser";
-    private static final String PASS = "vetpass1234";
+    private static final String USER = "root";
+    private static final String PASS = "root123";
 
     private static Connection conexion;
 

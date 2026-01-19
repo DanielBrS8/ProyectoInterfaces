@@ -195,22 +195,23 @@ public class controlador {
     @FXML
     private Button btnLimpiarAdopciones;
 
+    // Componentes de Informes JasperReports
     @FXML
-    private DatePicker dpInformeDesde;
+    private javafx.scene.web.WebView webViewInforme;
     @FXML
-    private DatePicker dpInformeHasta;
+    private ComboBox<String> comboFiltroEstadoInforme;
     @FXML
-    private ComboBox<String> comboInformeMascota;
+    private Button btnMascotasIncrustado;
     @FXML
-    private ComboBox<String> comboInformeUsuario;
+    private Button btnMascotasVentana;
     @FXML
-    private TableView<?> tablaInformes;
+    private Button btnMascotasPdf;
     @FXML
-    private Button btnExportarPdf;
+    private Button btnAdopcionesIncrustado;
     @FXML
-    private Button btnExportarExcel;
+    private Button btnAdopcionesVentana;
     @FXML
-    private Button btnBuscarContratos;
+    private Button btnAdopcionesPdf;
 
     private AnchorPane vistaActual;
 
@@ -239,6 +240,9 @@ public class controlador {
         btnNuevo.setOnAction(e -> accionCrud("Nuevo"));
         btnEditar.setOnAction(e -> accionCrud("Editar"));
         btnEliminar.setOnAction(e -> accionCrud("Eliminar"));
+
+        // Configurar botones de Informes JasperReports
+        configurarBotonesInformes();
 
         configurarColumnasUsuarios();
         configurarColumnasMascotas();
@@ -304,10 +308,6 @@ public class controlador {
             tablaAdopciones.getSelectionModel().selectedItemProperty()
                     .addListener((obs, o, n) -> actualizarEstadoBotonesCrud());
         }
-        if (tablaInformes != null) {
-            tablaInformes.getSelectionModel().selectedItemProperty()
-                    .addListener((obs, o, n) -> actualizarEstadoBotonesCrud());
-        }
     }
 
     private void marcarBotonActivo(Button activo) {
@@ -368,7 +368,7 @@ public class controlador {
             case ADOPCIONES ->
                 haySeleccion = tablaAdopciones != null && tablaAdopciones.getSelectionModel().getSelectedItem() != null;
             case INFORMES ->
-                haySeleccion = tablaInformes != null && tablaInformes.getSelectionModel().getSelectedItem() != null;
+                haySeleccion = false; // La vista de informes no tiene tabla seleccionable
             default ->
                 haySeleccion = false;
         }
@@ -1236,59 +1236,13 @@ public class controlador {
     }
 
     private void mostrarDialogoEditarInforme() {
-        Object seleccionado = (tablaInformes != null)
-                ? tablaInformes.getSelectionModel().getSelectedItem()
-                : null;
-
-        if (seleccionado == null) {
-            mostrarInfo("Editar informe", "Selecciona primero un informe de la tabla.");
-            return;
-        }
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Editar informe");
-        dialog.setHeaderText("Edita los datos del informe");
-
-        ButtonType btnAceptar = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
-        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(btnAceptar, btnCancelar);
-
-        GridPane grid = crearGridBasico();
-
-        TextField txtId = new TextField();
-        TextField txtUsuario = new TextField();
-        TextField txtMascota = new TextField();
-        DatePicker dpFecha = new DatePicker();
-        TextField txtEstado = new TextField();
-
-        grid.addRow(0, new Label("ID:"), txtId);
-        grid.addRow(1, new Label("Usuario:"), txtUsuario);
-        grid.addRow(2, new Label("Mascota:"), txtMascota);
-        grid.addRow(3, new Label("Fecha:"), dpFecha);
-        grid.addRow(4, new Label("Estado:"), txtEstado);
-
-        dialog.getDialogPane().setContent(grid);
-        añadirIconoADialogo(dialog);
-        dialog.showAndWait();
+        // Los informes JasperReports no se editan desde la interfaz
+        mostrarInfo("Informes", "Los informes se generan automáticamente desde la base de datos.");
     }
 
     private void mostrarDialogoEliminarInforme() {
-        Object seleccionado = (tablaInformes != null)
-                ? tablaInformes.getSelectionModel().getSelectedItem()
-                : null;
-
-        if (seleccionado == null) {
-            mostrarInfo("Eliminar informe", "Selecciona primero un informe de la tabla.");
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar informe");
-        confirm.setHeaderText(null);
-        confirm.setContentText("¿Seguro que quieres eliminar el informe seleccionado?");
-        añadirIconoADialogo(confirm);
-
-        confirm.showAndWait();
+        // Los informes JasperReports no se eliminan desde la interfaz
+        mostrarInfo("Informes", "Los informes se generan automáticamente desde la base de datos.");
     }
 
     private GridPane crearGridBasico() {
@@ -2436,6 +2390,68 @@ public class controlador {
         if (lblErrorConexionAdopciones != null) {
             lblErrorConexionAdopciones.setVisible(false);
             lblErrorConexionAdopciones.setManaged(false);
+        }
+    }
+
+    // ==================== INFORMES JASPERREPORTS ====================
+
+    private void configurarBotonesInformes() {
+        // Configurar ComboBox de filtro de estados
+        if (comboFiltroEstadoInforme != null) {
+            comboFiltroEstadoInforme.getItems().addAll("TODOS", "activo", "pendiente", "finalizado");
+            comboFiltroEstadoInforme.setValue("TODOS");
+        }
+
+        // === INFORME DE MASCOTAS ===
+
+        // Ver incrustado
+        if (btnMascotasIncrustado != null) {
+            btnMascotasIncrustado.setOnAction(e -> {
+                if (webViewInforme != null) {
+                    InformesUtil.lanzarInformeMascotasIncrustado(webViewInforme);
+                }
+            });
+        }
+
+        // Ver en ventana nueva
+        if (btnMascotasVentana != null) {
+            btnMascotasVentana.setOnAction(e -> InformesUtil.lanzarInformeMascotasVentana());
+        }
+
+        // Exportar a PDF
+        if (btnMascotasPdf != null) {
+            btnMascotasPdf.setOnAction(e -> InformesUtil.exportarInformeMascotasPDF());
+        }
+
+        // === INFORME DE ADOPCIONES ===
+
+        // Ver incrustado
+        if (btnAdopcionesIncrustado != null) {
+            btnAdopcionesIncrustado.setOnAction(e -> {
+                if (webViewInforme != null) {
+                    String filtro = comboFiltroEstadoInforme != null ?
+                        comboFiltroEstadoInforme.getValue() : "TODOS";
+                    InformesUtil.lanzarInformeAdopcionesIncrustado(webViewInforme, filtro);
+                }
+            });
+        }
+
+        // Ver en ventana nueva
+        if (btnAdopcionesVentana != null) {
+            btnAdopcionesVentana.setOnAction(e -> {
+                String filtro = comboFiltroEstadoInforme != null ?
+                    comboFiltroEstadoInforme.getValue() : "TODOS";
+                InformesUtil.lanzarInformeAdopcionesVentana(filtro);
+            });
+        }
+
+        // Exportar a PDF
+        if (btnAdopcionesPdf != null) {
+            btnAdopcionesPdf.setOnAction(e -> {
+                String filtro = comboFiltroEstadoInforme != null ?
+                    comboFiltroEstadoInforme.getValue() : "TODOS";
+                InformesUtil.exportarInformeAdopcionesPDF(filtro);
+            });
         }
     }
 }
