@@ -2393,7 +2393,7 @@ public class controlador {
         }
     }
 
-    // ==================== INFORMES JASPERREPORTS ====================
+    //INFORMES JASPERREPORTS
 
     private void configurarBotonesInformes() {
         // Configurar ComboBox de filtro de estados
@@ -2402,7 +2402,7 @@ public class controlador {
             comboFiltroEstadoInforme.setValue("TODOS");
         }
 
-        // === INFORME DE MASCOTAS ===
+        //  INFORME DE MASCOTAS 
 
         // Ver incrustado
         if (btnMascotasIncrustado != null) {
@@ -2423,7 +2423,7 @@ public class controlador {
             btnMascotasPdf.setOnAction(e -> InformesUtil.exportarInformeMascotasPDF());
         }
 
-        // === INFORME DE ADOPCIONES ===
+        //  INFORME DE ADOPCIONES
 
         // Ver incrustado
         if (btnAdopcionesIncrustado != null) {
