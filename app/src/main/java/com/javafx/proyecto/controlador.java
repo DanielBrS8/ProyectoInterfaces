@@ -1542,8 +1542,8 @@ public class controlador {
     private void cargarDatosDashboard() {
         try (Connection conn = ConexionBBDD.getConexion()) {
 
-            // Usuarios activos (con activo = true)
-            String sqlUsuarios = "SELECT COUNT(*) FROM Usuarios WHERE activo = true";
+            // Usuarios activos (con activo = 1)
+            String sqlUsuarios = "SELECT COUNT(*) FROM Usuarios WHERE activo = 1";
             try (Statement st = conn.createStatement();
                  ResultSet rsUsuarios = st.executeQuery(sqlUsuarios)) {
                 if (rsUsuarios.next()) {
@@ -1621,7 +1621,7 @@ public class controlador {
                 + " SELECT CONCAT('Mascota: ', nombre, ' - ', raza) AS descripcion, fecha_nacimiento AS fecha "
                 + " FROM Mascotas "
                 + " UNION ALL "
-                + " SELECT CONCAT('Usuario: ', nombre, ' - ', email) AS descripcion, CURDATE() AS fecha "
+                + " SELECT CONCAT('Usuario: ', nombre, ' - ', email) AS descripcion, CURRENT_DATE AS fecha "
                 + " FROM Usuarios "
                 + " UNION ALL "
                 + " SELECT CONCAT('Adopción de ', m.nombre, ' - ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "

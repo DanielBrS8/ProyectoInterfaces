@@ -5,12 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConexionBBDD {
+    // Supabase PostgreSQL connection (Session Pooler)
+    private static final String URL =
+            "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres" +
+            "?sslmode=require";
 
-    private static final String URL = "jdbc:mariadb://127.0.0.1:3306/Veterinario" +
-            "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8";
-
-    private static final String USER = "root";
-    private static final String PASS = "root123";
+    private static final String USER = "postgres.ppkejrnppfuatarenrls";
+    private static final String PASS = "ContraseñaProyectoInterfaces";
 
     private static Connection conexion;
 

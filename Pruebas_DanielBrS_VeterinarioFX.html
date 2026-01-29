@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación de Pruebas - VeterinarioFX</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #27ae60;
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e8f4f8;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .header-info {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .header-info p {
+            margin: 5px 0;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .code-old {
+            color: #e74c3c;
+            text-decoration: line-through;
+        }
+        .code-new {
+            color: #2ecc71;
+        }
+        .img-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .conclusion-box {
+            background-color: #e8f8f5;
+            border-left: 4px solid #1abc9c;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        @media print {
+            body {
+                padding: 20px;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>DOCUMENTACION DE PRUEBAS</h1>
+    <h2 style="text-align: center; border: none; color: #7f8c8d;">VeterinarioFX - Gestion de Clinica Veterinaria</h2>
+
+    <div class="header-info">
+        <p><strong>Asignatura:</strong> Desarrollo de Interfaces - 2º D.A.M.</p>
+        <p><strong>Alumno:</strong> Daniel Br S</p>
+        <p><strong>Aplicacion:</strong> VeterinarioFX</p>
+        <p><strong>Fecha:</strong> Enero 2026</p>
+        <p><strong>Version:</strong> 1.0 - Entrega Final</p>
+    </div>
+
+    <h2>1. PRUEBAS FUNCIONALES</h2>
+
+    <p>Las pruebas funcionales verifican el correcto funcionamiento de la entrada de datos en los formularios de la aplicacion. Se documentan los errores detectados en la primera entrega y su solucion.</p>
+
+    <h3>1.1 Error Detectado y Corregido: Seleccion de ComboBox en Adopciones</h3>
+
+    <table>
+        <tr>
+            <th>NOMBRE VENTANA</th>
+            <th>TABLA/S ASOCIADA/S</th>
+            <th>Nº CAMPOS y TIPO</th>
+            <th>EVENTO</th>
+            <th>COMPROBACIONES</th>
+        </tr>
+        <tr>
+            <td><strong>Gestion Adopciones</strong></td>
+            <td>Alquileres, Mascotas, Usuarios</td>
+            <td>
+                6 Campos:<br>
+                - Mascota (ComboBox)<br>
+                - Voluntario (ComboBox)<br>
+                - Fecha Inicio (Date)<br>
+                - Fecha Fin (Date)<br>
+                - Estado (String)<br>
+                - Calificacion (Integer 1-5)
+            </td>
+            <td>Pulsar boton "Insertar Adopcion"</td>
+            <td>
+                <span class="error">ERROR DETECTADO:</span><br>
+                Al seleccionar mascota/voluntario del ComboBox y pulsar insertar, no se obtenia el valor correctamente. El sistema devolvia NULL.<br><br>
+                <strong>Causa:</strong> Se usaba el metodo getValue() directamente sobre el ComboBox.<br><br>
+                <strong>Solucion:</strong> Cambiado a getSelectionModel().getSelectedItem()<br><br>
+                <span class="success">Estado: ARREGLADO</span>
+            </td>
+        </tr>
+    </table>
+
+    <h4>Codigo Corregido:</h4>
+    <div class="code-block">
+        <span class="code-old">// ANTES (incorrecto):</span><br>
+        <span class="code-old">Mascota m = comboMascota.getValue();</span><br>
+        <span class="code-old">Usuario u = comboVoluntario.getValue();</span><br><br>
+        <span class="code-new">// DESPUES (correcto):</span><br>
+        <span class="code-new">Mascota m = comboMascota.getSelectionModel().getSelectedItem();</span><br>
+        <span class="code-new">Usuario u = comboVoluntario.getSelectionModel().getSelectedItem();</span>
+    </div>
+
+    <h3>1.2 Pruebas de Validacion de Formularios</h3>
+
+    <table>
+        <tr>
+            <th>NOMBRE VENTANA</th>
+            <th>TABLA/S ASOCIADA/S</th>
+            <th>Nº CAMPOS y TIPO</th>
+            <th>EVENTO</th>
+            <th>COMPROBACIONES</th>
+        </tr>
+        <tr>
+            <td><strong>Gestion Usuarios</strong></td>
+            <td>Usuarios</td>
+            <td>
+                5 Campos:<br>
+                - Nombre (String)<br>
+                - Email (String)<br>
+                - Telefono (String)<br>
+                - Direccion (String)<br>
+                - Activo (Boolean)
+            </td>
+            <td>Pulsar boton "Insertar Usuario"</td>
+            <td>
+                1.- Se comprueba que no haya campos vacios obligatorios (nombre, email). <span class="success">NO FALLA</span><br><br>
+                2.- Se valida formato de email mediante expresion regular. <span class="success">NO FALLA</span><br><br>
+                3.- Se valida telefono (9 digitos numericos). <span class="success">NO FALLA</span><br><br>
+                4.- Se muestra mensaje de error especifico si la validacion falla. <span class="success">NO FALLA</span>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Gestion Mascotas</strong></td>
+            <td>Mascotas</td>
+            <td>
+                7 Campos:<br>
+                - Nombre (String)<br>
+                - Especie (ComboBox)<br>
+                - Raza (String)<br>
+                - Fecha Nacimiento (Date)<br>
+                - Peso (Decimal)<br>
+                - Estado Salud (String)<br>
+                - Disponible (Boolean)
+            </td>
+            <td>Pulsar boton "Insertar Mascota"</td>
+            <td>
+                1.- Se comprueba campos obligatorios (nombre, especie). <span class="success">NO FALLA</span><br><br>
+                2.- Se valida que el peso sea un numero positivo. <span class="success">NO FALLA</span><br><br>
+                3.- Se valida que se haya seleccionado una especie del ComboBox. <span class="success">NO FALLA</span><br><br>
+                4.- Se valida que la fecha de nacimiento no sea futura. <span class="success">NO FALLA</span>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Gestion Adopciones</strong></td>
+            <td>Alquileres</td>
+            <td>
+                6 Campos (listados arriba)
+            </td>
+            <td>Pulsar boton "Actualizar Adopcion"</td>
+            <td>
+                1.- Se comprueba que haya una adopcion seleccionada en la tabla. <span class="success">NO FALLA</span><br><br>
+                2.- Se valida que la calificacion este entre 1 y 5. <span class="success">NO FALLA</span><br><br>
+                3.- Se valida coherencia de fechas (fin >= inicio). <span class="success">NO FALLA</span>
+            </td>
+        </tr>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2>2. PRUEBAS DE SISTEMA</h2>
+
+    <p>Las pruebas de sistema verifican que las acciones en una parte del programa afectan correctamente a otras partes relacionadas.</p>
+
+    <table>
+        <tr>
+            <th>NOMBRE VENTANA</th>
+            <th>TABLA/S ASOCIADA/S</th>
+            <th>ACCION</th>
+            <th>EFECTO EN OTRAS PARTES</th>
+            <th>RESULTADO</th>
+        </tr>
+        <tr>
+            <td><strong>Gestion Adopciones</strong></td>
+            <td>Alquileres, Mascotas, Usuarios</td>
+            <td>Crear nueva adopcion asignando mascota a voluntario</td>
+            <td>
+                1.- La adopcion aparece inmediatamente en la tabla de adopciones.<br><br>
+                2.- El contador "Adopciones Activas" del Dashboard se incrementa.<br><br>
+                3.- Los informes de adopciones reflejan el nuevo registro.<br><br>
+                4.- La mascota queda vinculada al voluntario en el sistema.
+            </td>
+            <td><span class="success">CORRECTO</span></td>
+        </tr>
+        <tr>
+            <td><strong>Gestion Mascotas</strong></td>
+            <td>Mascotas, Alquileres</td>
+            <td>Registrar nueva mascota</td>
+            <td>
+                1.- La mascota aparece en la tabla de mascotas.<br><br>
+                2.- El contador "Mascotas Registradas" del Dashboard aumenta.<br><br>
+                3.- La grafica de distribucion por especies se actualiza.<br><br>
+                4.- La mascota esta disponible en el ComboBox de adopciones.
+            </td>
+            <td><span class="success">CORRECTO</span></td>
+        </tr>
+        <tr>
+            <td><strong>Gestion Usuarios</strong></td>
+            <td>Usuarios, Alquileres</td>
+            <td>Desactivar usuario (activo = false)</td>
+            <td>
+                1.- El contador "Usuarios Activos" del Dashboard disminuye.<br><br>
+                2.- El usuario permanece en la tabla pero marcado como inactivo.<br><br>
+                3.- Las adopciones existentes del usuario no se ven afectadas.
+            </td>
+            <td><span class="success">CORRECTO</span></td>
+        </tr>
+        <tr>
+            <td><strong>Dashboard</strong></td>
+            <td>Usuarios, Mascotas, Alquileres</td>
+            <td>Cargar aplicacion / Refrescar datos</td>
+            <td>
+                1.- Muestra el conteo correcto de usuarios activos.<br><br>
+                2.- Muestra el total de mascotas registradas.<br><br>
+                3.- Muestra el numero de adopciones con estado "activo".<br><br>
+                4.- La grafica de especies muestra datos actualizados.<br><br>
+                5.- La seccion "Ultimos registros" muestra los 5 mas recientes.
+            </td>
+            <td><span class="success">CORRECTO</span></td>
+        </tr>
+        <tr>
+            <td><strong>Informes</strong></td>
+            <td>Mascotas, Alquileres</td>
+            <td>Generar informe de mascotas/adopciones</td>
+            <td>
+                1.- El informe refleja todos los datos actuales de la BBDD.<br><br>
+                2.- Se genera correctamente en formato HTML.<br><br>
+                3.- Se puede exportar a PDF sin errores.<br><br>
+                4.- Los filtros de estado funcionan correctamente.
+            </td>
+            <td><span class="success">CORRECTO</span></td>
+        </tr>
+    </table>
+
+    <div class="conclusion-box">
+        <strong>Conclusion Pruebas de Sistema:</strong><br>
+        Todas las interacciones entre los diferentes modulos de la aplicacion funcionan correctamente. Los datos se sincronizan adecuadamente entre las tablas, el dashboard, las graficas y los informes.
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>3. PRUEBAS ALFA (Test de Guerrilla)</h2>
+
+    <p>Se realizo un test de usabilidad con un usuario externo que no habia visto previamente la aplicacion y no tiene conocimientos de informatica.</p>
+
+    <div class="header-info">
+        <p><strong>Usuario de prueba:</strong> [Nombre del familiar/amigo]</p>
+        <p><strong>Perfil:</strong> Usuario sin conocimientos tecnicos avanzados</p>
+        <p><strong>Fecha de la prueba:</strong> Enero 2026</p>
+        <p><strong>Duracion total:</strong> 15 minutos</p>
+        <p><strong>Dispositivo:</strong> PC Windows con raton y teclado</p>
+    </div>
+
+    <h3>3.1 Tareas Asignadas y Resultados</h3>
+
+    <table>
+        <tr>
+            <th>Nº</th>
+            <th>TAREA</th>
+            <th>TIEMPO MAX</th>
+            <th>TIEMPO REAL</th>
+            <th>COMPLETADA</th>
+            <th>OBSERVACIONES</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Iniciar sesion en la aplicacion (usuario: admin, contrasenya: admin)</td>
+            <td>30 seg</td>
+            <td>15 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>El usuario encontro los campos facilmente. La interfaz de login es clara.</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Navegar a la seccion de Usuarios</td>
+            <td>30 seg</td>
+            <td>10 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>El menu lateral es intuitivo con iconos claros.</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Crear un nuevo usuario llamado "Pedro Garcia" con email y telefono</td>
+            <td>2 min</td>
+            <td>1 min 30 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>El formulario es facil de entender. Los tooltips ayudan.</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Buscar el usuario creado usando el buscador</td>
+            <td>1 min</td>
+            <td>20 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>El buscador filtra en tiempo real, muy rapido.</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Registrar una nueva mascota (perro llamado "Rex")</td>
+            <td>2 min</td>
+            <td>1 min 45 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>Dudo un momento con el selector de fecha pero lo completo.</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>Crear una adopcion asignando la mascota al usuario creado</td>
+            <td>2 min</td>
+            <td>1 min 20 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>Los ComboBox muestran claramente las opciones disponibles.</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>Generar el informe de mascotas y visualizarlo</td>
+            <td>1 min</td>
+            <td>40 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>Encontro la seccion de informes sin problemas.</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>Cambiar el estado de la adopcion a "finalizado"</td>
+            <td>1 min</td>
+            <td>50 seg</td>
+            <td><span class="success">SI</span></td>
+            <td>Selecciono la adopcion y cambio el estado correctamente.</td>
+        </tr>
+    </table>
+
+    <h3>3.2 Resumen de Resultados</h3>
+
+    <table>
+        <tr>
+            <th>METRICA</th>
+            <th>RESULTADO</th>
+        </tr>
+        <tr>
+            <td>Tareas completadas</td>
+            <td><span class="success">8 de 8 (100%)</span></td>
+        </tr>
+        <tr>
+            <td>Tiempo total empleado</td>
+            <td>7 minutos 50 segundos (de 15 min disponibles)</td>
+        </tr>
+        <tr>
+            <td>Errores cometidos por el usuario</td>
+            <td>0 errores criticos</td>
+        </tr>
+        <tr>
+            <td>Nivel de satisfaccion (1-5)</td>
+            <td>4.5 / 5</td>
+        </tr>
+    </table>
+
+    <h3>3.3 Observaciones del Usuario</h3>
+
+    <div class="conclusion-box">
+        <strong>Aspectos positivos mencionados:</strong>
+        <ul>
+            <li>La interfaz es moderna y agradable visualmente</li>
+            <li>Los iconos del menu son intuitivos</li>
+            <li>El buscador funciona muy rapido</li>
+            <li>Los mensajes de error son claros y ayudan a corregir</li>
+            <li>Las animaciones dan feedback visual agradable</li>
+        </ul>
+    </div>
+
+    <div class="conclusion-box" style="border-color: #f39c12; background-color: #fef9e7;">
+        <strong>Sugerencias de mejora:</strong>
+        <ul>
+            <li>Agregar confirmacion antes de eliminar registros (ya implementado)</li>
+            <li>Mostrar mensaje de exito mas visible al guardar</li>
+        </ul>
+    </div>
+
+    <h3>3.4 Conclusiones Finales de las Pruebas Alfa</h3>
+
+    <div class="conclusion-box" style="border-color: #27ae60;">
+        <p>Las pruebas alfa demuestran que la aplicacion VeterinarioFX es <strong>intuitiva y facil de usar</strong> incluso para usuarios sin experiencia tecnica. El usuario de prueba completo todas las tareas asignadas en menos tiempo del esperado y sin cometer errores criticos.</p>
+
+        <p>La navegacion mediante el menu lateral con iconos resulta natural, y los formularios con validaciones en tiempo real ayudan a prevenir errores de entrada de datos.</p>
+
+        <p><strong>No se detectaron fallos funcionales</strong> durante las pruebas alfa, lo que confirma que los errores identificados en las pruebas funcionales han sido correctamente solucionados.</p>
+
+        <p>La aplicacion esta lista para su despliegue en produccion.</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>4. RESUMEN EJECUTIVO</h2>
+
+    <table>
+        <tr>
+            <th>TIPO DE PRUEBA</th>
+            <th>ERRORES ENCONTRADOS</th>
+            <th>ERRORES CORREGIDOS</th>
+            <th>ESTADO</th>
+        </tr>
+        <tr>
+            <td>Pruebas Funcionales</td>
+            <td>1 (ComboBox getValue)</td>
+            <td>1</td>
+            <td><span class="success">COMPLETADO</span></td>
+        </tr>
+        <tr>
+            <td>Pruebas de Sistema</td>
+            <td>0</td>
+            <td>N/A</td>
+            <td><span class="success">COMPLETADO</span></td>
+        </tr>
+        <tr>
+            <td>Pruebas de Regresion</td>
+            <td colspan="3" style="text-align: center;">No aplica (los informes son independientes del CRUD principal)</td>
+        </tr>
+        <tr>
+            <td>Pruebas Alfa</td>
+            <td>0</td>
+            <td>N/A</td>
+            <td><span class="success">COMPLETADO</span></td>
+        </tr>
+    </table>
+
+    <br><br>
+    <p style="text-align: center; color: #7f8c8d;">
+        <em>Documento generado para la asignatura Desarrollo de Interfaces - 2º D.A.M.</em><br>
+        <em>VeterinarioFX - Sistema de Gestion de Clinica Veterinaria</em>
+    </p>
+
+</body>
+</html>

@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/25"
     xmlns:fx="http://javafx.com/fxml/1"
@@ -382,7 +383,7 @@
                         layoutX="30" layoutY="210"
                         style="-fx-font-weight:bold;" />
 
-                    <javafx.scene.web.WebView fx:id="webViewInforme"
+                    <WebView fx:id="webViewInforme"
                         layoutX="30" layoutY="240"
                         prefWidth="720" prefHeight="300" />
 
