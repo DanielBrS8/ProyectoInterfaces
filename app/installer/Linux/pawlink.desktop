@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=PawLink
+Icon=/home/usuario/PawLink/logo-ico.png
+Exec=/home/usuario/PawLink/PawLink.exe
+Terminal=false

@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/25"
     xmlns:fx="http://javafx.com/fxml/1"
@@ -339,77 +340,52 @@
             <AnchorPane fx:id="vistaInformes" visible="false">
                 <children>
 
-                    <Label text="Informes"
+                    <Label text="Informes JasperReports"
                         layoutX="30" layoutY="10"
                         style="-fx-font-size: 22px; -fx-font-weight: bold;" />
 
-                    <Label text="Contratos de adopción"
-                        layoutX="30" layoutY="40"
+                    <!-- Sección Informe de Mascotas -->
+                    <Label text="Informe de Mascotas (con gráficas)"
+                        layoutX="30" layoutY="50"
+                        style="-fx-font-weight:bold; -fx-font-size: 14px;" />
+
+                    <HBox layoutX="30" layoutY="80" spacing="10">
+                        <children>
+                            <Button fx:id="btnMascotasIncrustado" text="Ver Incrustado"
+                                style="-fx-background-color:#276FBF; -fx-text-fill:white;" />
+                            <Button fx:id="btnMascotasVentana" text="Ver en Ventana"
+                                style="-fx-background-color:#5C6BC0; -fx-text-fill:white;" />
+                            <Button fx:id="btnMascotasPdf" text="Exportar PDF"
+                                style="-fx-background-color:#4CAF50; -fx-text-fill:white;" />
+                        </children>
+                    </HBox>
+
+                    <!-- Sección Informe de Adopciones -->
+                    <Label text="Informe de Adopciones (con filtro y gráfica)"
+                        layoutX="30" layoutY="130"
+                        style="-fx-font-weight:bold; -fx-font-size: 14px;" />
+
+                    <HBox layoutX="30" layoutY="160" spacing="10" alignment="CENTER_LEFT">
+                        <children>
+                            <Label text="Filtrar:" />
+                            <ComboBox fx:id="comboFiltroEstadoInforme" prefWidth="120" />
+                            <Button fx:id="btnAdopcionesIncrustado" text="Ver Incrustado"
+                                style="-fx-background-color:#276FBF; -fx-text-fill:white;" />
+                            <Button fx:id="btnAdopcionesVentana" text="Ver en Ventana"
+                                style="-fx-background-color:#5C6BC0; -fx-text-fill:white;" />
+                            <Button fx:id="btnAdopcionesPdf" text="Exportar PDF"
+                                style="-fx-background-color:#4CAF50; -fx-text-fill:white;" />
+                        </children>
+                    </HBox>
+
+                    <!-- WebView para mostrar informe incrustado -->
+                    <Label text="Vista previa del informe:"
+                        layoutX="30" layoutY="210"
                         style="-fx-font-weight:bold;" />
 
-                    <Label text="Rango de fechas"
-                        layoutX="30" layoutY="65" />
-
-                    <HBox layoutX="30" layoutY="90" spacing="10">
-                        <children>
-                            <DatePicker fx:id="dpInformeDesde" promptText="Desde" />
-                            <DatePicker fx:id="dpInformeHasta" promptText="Hasta" />
-                        </children>
-                    </HBox>
-
-                    <HBox layoutX="30" layoutY="135" spacing="20">
-                        <children>
-                            <VBox spacing="5">
-                                <children>
-                                    <Label text="Seleccionar mascota" />
-                                    <ComboBox fx:id="comboInformeMascota"
-                                        prefWidth="200"
-                                        promptText="Seleccionar mascota" />
-                                </children>
-                            </VBox>
-
-                            <VBox spacing="5">
-                                <children>
-                                    <Label text="Seleccionar usuario" />
-                                    <ComboBox fx:id="comboInformeUsuario"
-                                        prefWidth="200"
-                                        promptText="Seleccionar usuario" />
-                                </children>
-                            </VBox>
-
-                            <Button fx:id="btnBuscarInformes" text="Buscar"
-                                prefHeight="32"
-                                style="-fx-background-color:#276FBF;
-                                           -fx-text-fill:white;" />
-                        </children>
-                    </HBox>
-
-                    <TableView fx:id="tablaInformes"
-                        layoutX="30" layoutY="190"
-                        prefHeight="300" prefWidth="740">
-                        <columns>
-                            <TableColumn fx:id="colInformeFechaInicio"
-                                text="Fecha inicio" prefWidth="110" />
-                            <TableColumn fx:id="colInformeFechaFin"
-                                text="Fecha fin" prefWidth="110" />
-                            <TableColumn fx:id="colInformeMascota"
-                                text="Mascota" prefWidth="160" />
-                            <TableColumn fx:id="colInformeUsuario"
-                                text="Usuario" prefWidth="160" />
-                            <TableColumn fx:id="colInformeEstado"
-                                text="Estado" prefWidth="100" />
-                            <TableColumn fx:id="colInformeContrato"
-                                text="Contrato" prefWidth="100" />
-                        </columns>
-                    </TableView>
-
-                    <HBox layoutX="30" layoutY="510" spacing="10">
-                        <children>
-                            <Button fx:id="btnExportarPdf" text="Exportar todo a PDF" />
-                            <Button fx:id="btnExportarExcel" text="Exportar a Excel" />
-                            <Button fx:id="btnBuscarContratos" text="Buscar contratos" />
-                        </children>
-                    </HBox>
+                    <WebView fx:id="webViewInforme"
+                        layoutX="30" layoutY="240"
+                        prefWidth="720" prefHeight="300" />
 
                 </children>
             </AnchorPane>

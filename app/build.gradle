@@ -39,6 +39,44 @@ application {
     mainClass = 'com.javafx.proyecto.Main'
 }
 
+// ============================================
+// TAREAS PARA GENERAR DISTRIBUCIÓN INSTALABLE
+// ============================================
+
+// Tarea para copiar todas las dependencias a build/libs/lib
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    into "${buildDir}/libs/lib"
+}
+
+// Configurar el JAR con el MANIFEST correcto
+jar {
+    dependsOn copyDependencies
+
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get(),
+            'Class-Path': configurations.runtimeClasspath.files.collect { "lib/${it.name}" }.join(' ')
+        )
+    }
+
+    // Nombre del JAR final
+    archiveBaseName = 'app'
+    archiveVersion = ''
+}
+
+// Tarea combinada para construir todo
+task buildDistribution {
+    dependsOn jar, copyDependencies
+    doLast {
+        println "==================================="
+        println "Distribución creada en: ${buildDir}/libs/"
+        println "  - app.jar (ejecutable principal)"
+        println "  - lib/ (dependencias)"
+        println "==================================="
+    }
+}
+
 sourceSets {
     main {
         resources {
