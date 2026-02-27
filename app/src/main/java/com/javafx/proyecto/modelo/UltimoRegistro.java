@@ -1,4 +1,5 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.modelo;
+
 public class UltimoRegistro {
     private final String descripcion;
     private final String fecha;

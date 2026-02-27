@@ -1,9 +1,7 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.util;
 
-import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
-import org.controlsfx.validation.Validator;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
@@ -143,7 +141,7 @@ public class ValidadorForms {
         return vs;
     }
 
-    // ---------- ADOPCIONES ----------
+    // ADOPCIONES
 
     public static ValidationSupport validarEstadoAdopcion(TextField txtEstado) {
         ValidationSupport vs = new ValidationSupport();
@@ -180,9 +178,6 @@ public class ValidadorForms {
         return vs;
     }
 
-    /**
-     * Valida que la fecha fin sea mayor o igual que la fecha de inicio.
-     */
     public static ValidationSupport validarRangoFechasAdopcion(DatePicker dpInicio, DatePicker dpFin) {
         ValidationSupport vs = new ValidationSupport();
         vs.setErrorDecorationEnabled(true);
@@ -200,9 +195,6 @@ public class ValidadorForms {
         return vs;
     }
 
-    /**
-     * Valida que el ComboBox tenga un valor seleccionado.
-     */
     public static ValidationSupport validarComboBoxObligatorio(ComboBox<?> combo, String nombreCampo) {
         ValidationSupport vs = new ValidationSupport();
         vs.setErrorDecorationEnabled(true);
@@ -216,9 +208,6 @@ public class ValidadorForms {
         return vs;
     }
 
-    /**
-     * Valida que el CheckBox esté marcado (aceptado).
-     */
     public static ValidationSupport validarCheckBoxAceptado(CheckBox check, String nombreCampo) {
         ValidationSupport vs = new ValidationSupport();
         vs.setErrorDecorationEnabled(true);

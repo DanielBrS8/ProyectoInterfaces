@@ -1,4 +1,4 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.bbdd;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +23,6 @@ public class ConexionBBDD {
     private static void cargarConfiguracion() {
         Properties props = new Properties();
 
-        // Primero intenta cargar desde archivo externo (junto al JAR)
         File archivoExterno = new File("ip.properties");
         if (archivoExterno.exists()) {
             try (FileInputStream fis = new FileInputStream(archivoExterno)) {
@@ -34,7 +33,6 @@ public class ConexionBBDD {
                 cargarDesdeRecursos(props);
             }
         } else {
-            // Si no existe archivo externo, carga desde recursos internos
             cargarDesdeRecursos(props);
         }
 

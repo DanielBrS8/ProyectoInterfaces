@@ -1,4 +1,6 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.util;
+
+import com.javafx.proyecto.bbdd.ConexionBBDD;
 
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
@@ -17,13 +19,8 @@ import java.util.Map;
 
 public class InformesUtil {
 
-    // Carpeta donde se guardan los informes automáticamente
     private static final String CARPETA_INFORMES = "INFORMES";
 
-    /**
-     * Genera el informe de mascotas y lo muestra en un WebView (incrustado)
-     * También guarda el HTML en la carpeta INFORMES
-     */
     public static void lanzarInformeMascotasIncrustado(WebView webView) {
         try {
             JasperPrint jasperPrint = generarInformeMascotas();
@@ -37,10 +34,6 @@ public class InformesUtil {
         }
     }
 
-    /**
-     * Genera el informe de mascotas y lo muestra en una ventana nueva
-     * También guarda el HTML en la carpeta INFORMES
-     */
     public static void lanzarInformeMascotasVentana() {
         try {
             JasperPrint jasperPrint = generarInformeMascotas();
@@ -54,9 +47,6 @@ public class InformesUtil {
         }
     }
 
-    /**
-     * Exporta el informe de mascotas a PDF en la carpeta INFORMES
-     */
     public static void exportarInformeMascotasPDF() {
         try {
             JasperPrint jasperPrint = generarInformeMascotas();
@@ -81,10 +71,6 @@ public class InformesUtil {
         return JasperFillManager.fillReport(jasperReport, new HashMap<>(), conexion);
     }
 
-    /**
-     * Genera el informe de adopciones y lo muestra en un WebView (incrustado)
-     * También guarda el HTML en la carpeta INFORMES
-     */
     public static void lanzarInformeAdopcionesIncrustado(WebView webView, String estadoFiltro) {
         try {
             JasperPrint jasperPrint = generarInformeAdopciones(estadoFiltro);
@@ -99,10 +85,6 @@ public class InformesUtil {
         }
     }
 
-    /**
-     * Genera el informe de adopciones y lo muestra en una ventana nueva
-     * También guarda el HTML en la carpeta INFORMES
-     */
     public static void lanzarInformeAdopcionesVentana(String estadoFiltro) {
         try {
             JasperPrint jasperPrint = generarInformeAdopciones(estadoFiltro);
@@ -119,9 +101,6 @@ public class InformesUtil {
         }
     }
 
-    /**
-     * Exporta el informe de adopciones a PDF en la carpeta INFORMES
-     */
     public static void exportarInformeAdopcionesPDF(String estadoFiltro) {
         try {
             JasperPrint jasperPrint = generarInformeAdopciones(estadoFiltro);
@@ -150,11 +129,7 @@ public class InformesUtil {
         return JasperFillManager.fillReport(jasperReport, parametros, conexion);
     }
 
-    /**
-     * Guarda el informe como HTML en la carpeta INFORMES del proyecto
-     */
     private static File guardarHTMLEnCarpeta(JasperPrint jasperPrint, String nombreArchivo) throws Exception {
-        // Crear carpeta INFORMES si no existe
         File carpeta = new File(CARPETA_INFORMES);
         if (!carpeta.exists()) {
             carpeta.mkdirs();
@@ -167,9 +142,6 @@ public class InformesUtil {
         return archivoHtml;
     }
 
-    /**
-     * Muestra un archivo HTML en una ventana nueva
-     */
     private static void mostrarEnVentanaNueva(File htmlFile, String titulo) {
         Stage ventana = new Stage();
         ventana.setTitle(titulo);
@@ -182,9 +154,6 @@ public class InformesUtil {
         ventana.show();
     }
 
-    /**
-     * Exporta un JasperPrint a PDF directamente en la carpeta INFORMES
-     */
     private static void exportarAPDF(JasperPrint jasperPrint, String nombreArchivo) throws Exception {
         File carpeta = new File(CARPETA_INFORMES);
         if (!carpeta.exists()) {

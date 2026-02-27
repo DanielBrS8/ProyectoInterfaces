@@ -8,7 +8,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/25"
     xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.javafx.proyecto.LoginController"
+    fx:controller="com.javafx.proyecto.controlador.LoginController"
     prefWidth="450" prefHeight="300"
     fx:id="loginPane"
     stylesheets="@styles.css">

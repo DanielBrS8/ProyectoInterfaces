@@ -1,4 +1,4 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.modelo;
 
 import java.time.LocalDate;
 
@@ -60,8 +60,6 @@ public class Mascota {
 
     @Override
     public String toString() {
-        
         return nombre + " (" + especie + ")";
-        
     }
 }

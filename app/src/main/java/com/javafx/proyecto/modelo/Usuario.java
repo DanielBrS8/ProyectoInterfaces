@@ -1,4 +1,4 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.modelo;
 
 public class Usuario {
 
@@ -45,7 +45,6 @@ public class Usuario {
 
     @Override
     public String toString() {
-        
         return nombre + " - " + email;
     }
 }

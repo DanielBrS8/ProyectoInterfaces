@@ -1,4 +1,4 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.modelo;
 
 import java.time.LocalDate;
 

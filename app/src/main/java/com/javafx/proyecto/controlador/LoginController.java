@@ -1,9 +1,8 @@
-package com.javafx.proyecto;
+package com.javafx.proyecto.controlador;
 
 import javafx.animation.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -150,5 +149,4 @@ public class LoginController {
             lblError.setText("Error cargando la ventana principal");
         }
     }
-
 }
