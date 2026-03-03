@@ -403,16 +403,14 @@ public class PrincipalController {
         listaUltimos.clear();
 
         String sql = "SELECT descripcion, fecha FROM ("
-                + " SELECT CONCAT('Mascota: ', nombre, ' - ', raza) AS descripcion, fecha_nacimiento AS fecha "
-                + " FROM Mascotas "
-                + " UNION ALL "
-                + " SELECT CONCAT('Usuario: ', nombre, ' - ', email) AS descripcion, CURRENT_DATE AS fecha "
-                + " FROM Usuarios "
-                + " UNION ALL "
-                + " SELECT CONCAT('Adopción de ', m.nombre, ' - ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "
+                + " SELECT CONCAT('Adopción de ', m.nombre, ' por ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "
                 + " FROM Alquileres a "
                 + " JOIN Mascotas m ON a.id_mascota = m.id_mascota "
                 + " JOIN Usuarios u ON a.id_voluntario = u.id_usuario "
+                + " UNION ALL "
+                + " SELECT CONCAT('Mascota registrada: ', nombre, ' (', especie, ')') AS descripcion, fecha_nacimiento AS fecha "
+                + " FROM Mascotas "
+                + " WHERE fecha_nacimiento IS NOT NULL "
                 + ") t "
                 + "ORDER BY fecha DESC "
                 + "LIMIT 5";
