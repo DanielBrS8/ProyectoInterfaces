@@ -233,7 +233,7 @@ public class UsuarioCrudController {
                 pst.setString(2, txtEmail.getText());
                 pst.setString(3, txtTelefono.getText());
                 pst.setString(4, txtDireccion.getText());
-                pst.setBoolean(5, chkActivo.isSelected());
+                pst.setInt(5, chkActivo.isSelected() ? 1 : 0);
                 pst.executeUpdate();
 
                 cargarDatos();
@@ -316,7 +316,7 @@ public class UsuarioCrudController {
                 pst.setString(2, txtEmail.getText());
                 pst.setString(3, txtTelefono.getText());
                 pst.setString(4, txtDireccion.getText());
-                pst.setBoolean(5, chkActivo.isSelected());
+                pst.setInt(5, chkActivo.isSelected() ? 1 : 0);
                 pst.setInt(6, seleccionado.getId());
                 pst.executeUpdate();
 

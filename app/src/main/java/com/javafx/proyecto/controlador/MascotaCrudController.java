@@ -156,7 +156,7 @@ public class MascotaCrudController {
 
                 try (Connection conn = ConexionBBDD.getConexion();
                         PreparedStatement pst = conn.prepareStatement(sql)) {
-                    pst.setBoolean(1, nuevoEstado);
+                    pst.setInt(1, nuevoEstado ? 1 : 0);
                     pst.setInt(2, seleccionada.getId());
                     pst.executeUpdate();
                     cargarDatos();
@@ -351,7 +351,7 @@ public class MascotaCrudController {
 
                 pst.setDouble(5, peso);
                 pst.setString(6, txtEstado.getText());
-                pst.setBoolean(7, chkDisponible.isSelected());
+                pst.setInt(7, chkDisponible.isSelected() ? 1 : 0);
                 pst.executeUpdate();
 
                 cargarDatos();
@@ -465,7 +465,7 @@ public class MascotaCrudController {
 
                 pst.setDouble(5, peso);
                 pst.setString(6, txtEstado.getText());
-                pst.setBoolean(7, chkDisponible.isSelected());
+                pst.setInt(7, chkDisponible.isSelected() ? 1 : 0);
                 pst.setInt(8, seleccionada.getId());
                 pst.executeUpdate();
 
