@@ -12,10 +12,14 @@ public class Mascota {
     private Double peso;
     private String estadoSalud;
     private Boolean disponible;
+    private Integer idCentro;
+    private String foto;
+    private String notas;
 
     public Mascota(Integer id, String nombre, String especie, String raza,
             LocalDate fechaNacimiento, Double peso,
-            String estadoSalud, Boolean disponible) {
+            String estadoSalud, Boolean disponible,
+            Integer idCentro, String foto, String notas) {
         this.id = id;
         this.nombre = nombre;
         this.especie = especie;
@@ -24,6 +28,9 @@ public class Mascota {
         this.peso = peso;
         this.estadoSalud = estadoSalud;
         this.disponible = disponible;
+        this.idCentro = idCentro;
+        this.foto = foto;
+        this.notas = notas;
     }
 
     public Integer getId() {
@@ -56,6 +63,18 @@ public class Mascota {
 
     public Boolean getDisponible() {
         return disponible;
+    }
+
+    public Integer getIdCentro() {
+        return idCentro;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public String getNotas() {
+        return notas;
     }
 
     @Override

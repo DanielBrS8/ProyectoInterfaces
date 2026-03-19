@@ -1,6 +1,6 @@
 package com.javafx.proyecto.controlador;
 
-import com.javafx.proyecto.bbdd.ConexionBBDD;
+import com.javafx.proyecto.bbdd.PawLinkClient;
 import com.javafx.proyecto.modelo.Mascota;
 import com.javafx.proyecto.util.UIUtils;
 import com.javafx.proyecto.util.ValidadorForms;
@@ -19,11 +19,13 @@ import javafx.scene.layout.GridPane;
 
 import org.controlsfx.validation.ValidationSupport;
 
-import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MascotaCrudController {
 
@@ -152,16 +154,22 @@ public class MascotaCrudController {
             Mascota seleccionada = tablaMascotas.getSelectionModel().getSelectedItem();
             if (seleccionada != null) {
                 boolean nuevoEstado = !seleccionada.getDisponible();
-                String sql = "UPDATE Mascotas SET disponible_alquiler = ? WHERE id_mascota = ?";
-
-                try (Connection conn = ConexionBBDD.getConexion();
-                        PreparedStatement pst = conn.prepareStatement(sql)) {
-                    pst.setInt(1, nuevoEstado ? 1 : 0);
-                    pst.setInt(2, seleccionada.getId());
-                    pst.executeUpdate();
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("idCentro", seleccionada.getIdCentro() != null ? seleccionada.getIdCentro() : 1);
+                body.put("nombre", seleccionada.getNombre());
+                body.put("especie", seleccionada.getEspecie());
+                body.put("raza", seleccionada.getRaza());
+                body.put("fechaNacimiento", seleccionada.getFechaNacimiento() != null ? seleccionada.getFechaNacimiento().toString() : null);
+                body.put("peso", seleccionada.getPeso());
+                body.put("estadoSalud", seleccionada.getEstadoSalud());
+                body.put("disponibleAlquiler", nuevoEstado ? 1 : 0);
+                body.put("foto", seleccionada.getFoto());
+                body.put("notas", seleccionada.getNotas());
+                try {
+                    PawLinkClient.actualizarMascota(seleccionada.getId(), body);
                     cargarDatos();
                     UIUtils.mostrarInfo("Éxito", "Disponibilidad actualizada");
-                } catch (SQLException ex) {
+                } catch (Exception ex) {
                     UIUtils.mostrarInfo("Error", "No se pudo actualizar: " + ex.getMessage());
                 }
             }
@@ -184,35 +192,27 @@ public class MascotaCrudController {
     public void cargarDatos() {
         listaMascotas.clear();
 
-        String sql = "SELECT id_mascota, nombre, especie, raza, fecha_nacimiento, "
-                + "peso, estado_salud, disponible_alquiler "
-                + "FROM Mascotas";
-
-        try (Connection conn = ConexionBBDD.getConexion();
-                Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
-
-            int contador = 0;
-            while (rs.next()) {
-                Date fechaSql = rs.getDate("fecha_nacimiento");
-                LocalDate fechaNac = fechaSql != null ? fechaSql.toLocalDate() : null;
-
-                Mascota m = new Mascota(
-                        rs.getInt("id_mascota"),
-                        rs.getString("nombre"),
-                        rs.getString("especie"),
-                        rs.getString("raza"),
-                        fechaNac,
-                        rs.getDouble("peso"),
-                        rs.getString("estado_salud"),
-                        rs.getBoolean("disponible_alquiler"));
-                listaMascotas.add(m);
-                contador++;
+        try {
+            List<Map<String, Object>> mascotas = PawLinkClient.getMascotas();
+            for (Map<String, Object> m : mascotas) {
+                int id = ((Number) m.get("idMascota")).intValue();
+                String nombre = (String) m.get("nombre");
+                String especie = (String) m.get("especie");
+                String raza = (String) m.get("raza");
+                String fechaStr = (String) m.get("fechaNacimiento");
+                LocalDate fechaNac = fechaStr != null ? LocalDate.parse(fechaStr) : null;
+                double peso = m.get("peso") instanceof Number ? ((Number) m.get("peso")).doubleValue() : 0.0;
+                String estadoSalud = (String) m.get("estadoSalud");
+                Object dispObj = m.get("disponibleAlquiler");
+                boolean disponible = dispObj instanceof Number && ((Number) dispObj).intValue() == 1;
+                int idCentro = m.get("idCentro") instanceof Number ? ((Number) m.get("idCentro")).intValue() : 1;
+                String foto = (String) m.get("foto");
+                String notas = (String) m.get("notas");
+                listaMascotas.add(new Mascota(id, nombre, especie, raza, fechaNac, peso, estadoSalud, disponible, idCentro, foto, notas));
             }
-            System.out.println("Mascotas cargadas: " + contador);
+            System.out.println("Mascotas cargadas: " + listaMascotas.size());
             UIUtils.ocultarErrorConexion(lblErrorConexionMascotas);
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.println("Error cargando mascotas: " + e.getMessage());
             UIUtils.mostrarErrorConexion(lblErrorConexionMascotas);
         }
@@ -226,24 +226,12 @@ public class MascotaCrudController {
         XYChart.Series<String, Number> serie = new XYChart.Series<>();
         serie.setName("Mascotas por especie");
 
-        String sql = "SELECT especie, COUNT(*) AS total FROM Mascotas GROUP BY especie";
+        Map<String, Long> conteo = listaMascotas.stream()
+                .filter(m -> m.getEspecie() != null)
+                .collect(Collectors.groupingBy(Mascota::getEspecie, Collectors.counting()));
+        conteo.forEach((especie, total) -> serie.getData().add(new XYChart.Data<>(especie, total)));
 
-        try (Connection conn = ConexionBBDD.getConexion();
-                Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
-
-            int contador = 0;
-            while (rs.next()) {
-                String especie = rs.getString("especie");
-                int total = rs.getInt("total");
-                serie.getData().add(new XYChart.Data<>(especie, total));
-                contador++;
-            }
-            System.out.println("Datos cargados para gráfica especies: " + contador);
-
-        } catch (SQLException e) {
-            System.out.println("Error cargando datos de la gráfica: " + e.getMessage());
-        }
+        System.out.println("Datos cargados para gráfica especies: " + conteo.size());
 
         graficaEspecies.getData().add(serie);
 
@@ -261,6 +249,9 @@ public class MascotaCrudController {
         dialog.getDialogPane().getButtonTypes().addAll(btnGuardar, btnCancelar);
 
         GridPane grid = UIUtils.crearGridBasico();
+
+        TextField txtIdCentro = new TextField("1");
+        txtIdCentro.setTooltip(new Tooltip("ID del centro veterinario"));
 
         TextField txtNombre = new TextField();
         txtNombre.setPromptText("Ej: Max");
@@ -289,13 +280,14 @@ public class MascotaCrudController {
         CheckBox chkDisponible = new CheckBox("_Disponible para alquiler");
         chkDisponible.setSelected(true);
 
-        grid.addRow(0, new Label("Nombre:"), txtNombre);
-        grid.addRow(1, new Label("Especie:"), txtEspecie);
-        grid.addRow(2, new Label("Raza:"), txtRaza);
-        grid.addRow(3, new Label("Fecha nac.:"), dpFechaNac);
-        grid.addRow(4, new Label("Peso (kg):"), txtPeso);
-        grid.addRow(5, new Label("Estado salud:"), txtEstado);
-        grid.addRow(6, new Label(""), chkDisponible);
+        grid.addRow(0, new Label("ID Centro:"), txtIdCentro);
+        grid.addRow(1, new Label("Nombre:"), txtNombre);
+        grid.addRow(2, new Label("Especie:"), txtEspecie);
+        grid.addRow(3, new Label("Raza:"), txtRaza);
+        grid.addRow(4, new Label("Fecha nac.:"), dpFechaNac);
+        grid.addRow(5, new Label("Peso (kg):"), txtPeso);
+        grid.addRow(6, new Label("Estado salud:"), txtEstado);
+        grid.addRow(7, new Label(""), chkDisponible);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -333,33 +325,24 @@ public class MascotaCrudController {
                 return;
             }
 
-            String sql = "INSERT INTO Mascotas "
-                    + "(nombre, especie, raza, fecha_nacimiento, peso, estado_salud, disponible_alquiler) "
-                    + "VALUES (?,?,?,?,?,?,?)";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setString(1, txtNombre.getText());
-                pst.setString(2, txtEspecie.getText());
-                pst.setString(3, txtRaza.getText());
-
-                LocalDate fechaNac = dpFechaNac.getValue();
-                if (fechaNac != null) {
-                    pst.setDate(4, java.sql.Date.valueOf(fechaNac));
-                } else {
-                    pst.setNull(4, java.sql.Types.DATE);
-                }
-
-                pst.setDouble(5, peso);
-                pst.setString(6, txtEstado.getText());
-                pst.setInt(7, chkDisponible.isSelected() ? 1 : 0);
-                pst.executeUpdate();
-
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("idCentro", Integer.parseInt(txtIdCentro.getText().isBlank() ? "1" : txtIdCentro.getText()));
+            body.put("nombre", txtNombre.getText());
+            body.put("especie", txtEspecie.getText());
+            body.put("raza", txtRaza.getText());
+            body.put("fechaNacimiento", dpFechaNac.getValue() != null ? dpFechaNac.getValue().toString() : null);
+            body.put("peso", peso);
+            body.put("estadoSalud", txtEstado.getText());
+            body.put("disponibleAlquiler", chkDisponible.isSelected() ? 1 : 0);
+            body.put("foto", null);
+            body.put("notas", null);
+            try {
+                PawLinkClient.crearMascota(body);
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo insertar la mascota:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo crear la mascota:\n" + e.getMessage());
             }
         }
     }
@@ -381,6 +364,10 @@ public class MascotaCrudController {
         dialog.getDialogPane().getButtonTypes().addAll(btnGuardar, btnCancelar);
 
         GridPane grid = UIUtils.crearGridBasico();
+
+        TextField txtIdCentro = new TextField(
+                seleccionada.getIdCentro() != null ? seleccionada.getIdCentro().toString() : "1");
+        txtIdCentro.setTooltip(new Tooltip("ID del centro veterinario"));
 
         TextField txtNombre = new TextField(seleccionada.getNombre());
         txtNombre.setTooltip(new Tooltip("Introduce el nombre de la mascota"));
@@ -404,13 +391,14 @@ public class MascotaCrudController {
         CheckBox chkDisponible = new CheckBox("_Disponible para alquiler");
         chkDisponible.setSelected(seleccionada.getDisponible());
 
-        grid.addRow(0, new Label("Nombre:"), txtNombre);
-        grid.addRow(1, new Label("Especie:"), txtEspecie);
-        grid.addRow(2, new Label("Raza:"), txtRaza);
-        grid.addRow(3, new Label("Fecha nac.:"), dpFechaNac);
-        grid.addRow(4, new Label("Peso (kg):"), txtPeso);
-        grid.addRow(5, new Label("Estado salud:"), txtEstado);
-        grid.addRow(6, new Label(""), chkDisponible);
+        grid.addRow(0, new Label("ID Centro:"), txtIdCentro);
+        grid.addRow(1, new Label("Nombre:"), txtNombre);
+        grid.addRow(2, new Label("Especie:"), txtEspecie);
+        grid.addRow(3, new Label("Raza:"), txtRaza);
+        grid.addRow(4, new Label("Fecha nac.:"), dpFechaNac);
+        grid.addRow(5, new Label("Peso (kg):"), txtPeso);
+        grid.addRow(6, new Label("Estado salud:"), txtEstado);
+        grid.addRow(7, new Label(""), chkDisponible);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -447,34 +435,24 @@ public class MascotaCrudController {
                 return;
             }
 
-            String sql = "UPDATE Mascotas SET nombre = ?, especie = ?, raza = ?, "
-                    + "fecha_nacimiento = ?, peso = ?, estado_salud = ?, disponible_alquiler = ? "
-                    + "WHERE id_mascota = ?";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setString(1, txtNombre.getText());
-                pst.setString(2, txtEspecie.getText());
-                pst.setString(3, txtRaza.getText());
-
-                LocalDate fechaNac = dpFechaNac.getValue();
-                if (fechaNac != null) {
-                    pst.setDate(4, java.sql.Date.valueOf(fechaNac));
-                } else {
-                    pst.setNull(4, java.sql.Types.DATE);
-                }
-
-                pst.setDouble(5, peso);
-                pst.setString(6, txtEstado.getText());
-                pst.setInt(7, chkDisponible.isSelected() ? 1 : 0);
-                pst.setInt(8, seleccionada.getId());
-                pst.executeUpdate();
-
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("idCentro", Integer.parseInt(txtIdCentro.getText().isBlank() ? "1" : txtIdCentro.getText()));
+            body.put("nombre", txtNombre.getText());
+            body.put("especie", txtEspecie.getText());
+            body.put("raza", txtRaza.getText());
+            body.put("fechaNacimiento", dpFechaNac.getValue() != null ? dpFechaNac.getValue().toString() : null);
+            body.put("peso", peso);
+            body.put("estadoSalud", txtEstado.getText());
+            body.put("disponibleAlquiler", chkDisponible.isSelected() ? 1 : 0);
+            body.put("foto", seleccionada.getFoto());
+            body.put("notas", seleccionada.getNotas());
+            try {
+                PawLinkClient.actualizarMascota(seleccionada.getId(), body);
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo actualizar la mascota:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo actualizar la mascota:\n" + e.getMessage());
             }
         }
     }
@@ -495,18 +473,13 @@ public class MascotaCrudController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String sql = "DELETE FROM Mascotas WHERE id_mascota = ?";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, seleccionada.getId());
-                pst.executeUpdate();
-
+            try {
+                PawLinkClient.eliminarMascota(seleccionada.getId());
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo eliminar la mascota:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo eliminar la mascota:\n" + e.getMessage());
             }
         }
     }

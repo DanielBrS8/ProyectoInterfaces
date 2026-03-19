@@ -169,7 +169,7 @@ public class PrincipalController {
                 comboBuscarAdopcionMascota, comboBuscarAdopcionVoluntario,
                 comboBuscarAdopcionEstado, comboBuscarAdopcionCalificacion,
                 btnLimpiarAdopciones, lblErrorConexionAdopciones,
-                this::recargarDashboard);
+                () -> { mascotaCtrl.cargarDatos(); mascotaCtrl.rellenarGraficaEspecies(); recargarDashboard(); });
 
         informesCtrl = new InformesController(
                 webViewInforme, comboFiltroEstadoInforme,
@@ -349,8 +349,17 @@ public class PrincipalController {
     }
 
     private void cargarDatosDashboard() {
-        try (Connection conn = ConexionBBDD.getConexion()) {
+        // Mascotas: ya cargadas en la lista
+        lblMascotasRegistradas.setText(String.valueOf(listaMascotas.size()));
 
+        // Adopciones activas: filtrar la lista
+        long activas = listaAdopciones.stream()
+                .filter(a -> "activo".equals(a.getEstado()))
+                .count();
+        lblAdopcionesActivas.setText(String.valueOf(activas));
+
+        // Usuarios activos: todavía vía JDBC (no hay endpoint en la API)
+        try (Connection conn = ConexionBBDD.getConexion()) {
             String sqlUsuarios = "SELECT COUNT(*) FROM Usuarios WHERE activo = 1";
             try (Statement st = conn.createStatement();
                  ResultSet rsUsuarios = st.executeQuery(sqlUsuarios)) {
@@ -358,26 +367,8 @@ public class PrincipalController {
                     lblUsuariosActivos.setText(String.valueOf(rsUsuarios.getInt(1)));
                 }
             }
-
-            String sqlMascotas = "SELECT COUNT(*) FROM Mascotas";
-            try (Statement st = conn.createStatement();
-                 ResultSet rsMascotas = st.executeQuery(sqlMascotas)) {
-                if (rsMascotas.next()) {
-                    lblMascotasRegistradas.setText(String.valueOf(rsMascotas.getInt(1)));
-                }
-            }
-
-            String sqlAdopciones = "SELECT COUNT(*) FROM Alquileres WHERE estado = 'activo'";
-            try (Statement st = conn.createStatement();
-                 ResultSet rsAdop = st.executeQuery(sqlAdopciones)) {
-                if (rsAdop.next()) {
-                    lblAdopcionesActivas.setText(String.valueOf(rsAdop.getInt(1)));
-                }
-            }
-
         } catch (SQLException e) {
-            System.out.println("Error cargando datos del dashboard: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Error cargando dashboard usuarios: " + e.getMessage());
         }
     }
 
@@ -403,14 +394,16 @@ public class PrincipalController {
         listaUltimos.clear();
 
         String sql = "SELECT descripcion, fecha FROM ("
-                + " SELECT CONCAT('Adopción de ', m.nombre, ' por ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "
-                + " FROM Alquileres a "
-                + " JOIN Mascotas m ON a.id_mascota = m.id_mascota "
-                + " JOIN Usuarios u ON a.id_voluntario = u.id_usuario "
-                + " UNION ALL "
-                + " SELECT CONCAT('Mascota registrada: ', nombre, ' (', especie, ')') AS descripcion, fecha_nacimiento AS fecha "
+                + " SELECT CONCAT('Mascota: ', nombre, ' - ', raza) AS descripcion, fecha_nacimiento AS fecha "
                 + " FROM Mascotas "
-                + " WHERE fecha_nacimiento IS NOT NULL "
+                + " UNION ALL "
+                + " SELECT CONCAT('Usuario: ', nombre, ' - ', email) AS descripcion, CURRENT_DATE AS fecha "
+                + " FROM Usuarios "
+                + " UNION ALL "
+                + " SELECT CONCAT('Adopción de ', m.nombre, ' - ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "
+                + " FROM alquiler a "
+                + " JOIN mascotas m ON a.id_mascota = m.id_mascota "
+                + " JOIN Usuarios u ON a.id_voluntario = u.id_usuario "
                 + ") t "
                 + "ORDER BY fecha DESC "
                 + "LIMIT 5";

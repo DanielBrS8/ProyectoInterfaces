@@ -11,10 +11,13 @@ public class AdopcionTabla {
     private LocalDate fechaFin;
     private String estado;
     private Integer calificacion;
+    private Integer idMascota;
+    private Integer idVoluntario;
 
     public AdopcionTabla(Integer id, String mascota, String voluntario,
             LocalDate fechaInicio, LocalDate fechaFin,
-            String estado, Integer calificacion) {
+            String estado, Integer calificacion,
+            Integer idMascota, Integer idVoluntario) {
         this.id = id;
         this.mascota = mascota;
         this.voluntario = voluntario;
@@ -22,6 +25,8 @@ public class AdopcionTabla {
         this.fechaFin = fechaFin;
         this.estado = estado;
         this.calificacion = calificacion;
+        this.idMascota = idMascota;
+        this.idVoluntario = idVoluntario;
     }
 
     public Integer getId() {
@@ -50,5 +55,13 @@ public class AdopcionTabla {
 
     public Integer getCalificacion() {
         return calificacion;
+    }
+
+    public Integer getIdMascota() {
+        return idMascota;
+    }
+
+    public Integer getIdVoluntario() {
+        return idVoluntario;
     }
 }

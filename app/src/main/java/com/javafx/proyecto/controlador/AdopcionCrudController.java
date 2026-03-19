@@ -1,6 +1,6 @@
 package com.javafx.proyecto.controlador;
 
-import com.javafx.proyecto.bbdd.ConexionBBDD;
+import com.javafx.proyecto.bbdd.PawLinkClient;
 import com.javafx.proyecto.modelo.AdopcionTabla;
 import com.javafx.proyecto.modelo.Mascota;
 import com.javafx.proyecto.modelo.Usuario;
@@ -17,10 +17,11 @@ import javafx.scene.layout.GridPane;
 
 import org.controlsfx.validation.ValidationSupport;
 
-import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class AdopcionCrudController {
@@ -144,16 +145,18 @@ public class AdopcionCrudController {
         itemCambiarEstado.setOnAction(e -> {
             AdopcionTabla seleccionada = tablaAdopciones.getSelectionModel().getSelectedItem();
             if (seleccionada != null) {
-                String sql = "UPDATE Alquileres SET estado = 'finalizado' WHERE id_alquiler = ?";
-
-                try (Connection conn = ConexionBBDD.getConexion();
-                        PreparedStatement pst = conn.prepareStatement(sql)) {
-                    pst.setInt(1, seleccionada.getId());
-                    pst.executeUpdate();
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("idMascota", seleccionada.getIdMascota());
+                body.put("idVoluntario", seleccionada.getIdVoluntario());
+                body.put("fechaInicio", seleccionada.getFechaInicio() != null ? seleccionada.getFechaInicio().toString() : null);
+                body.put("fechaFin", seleccionada.getFechaFin() != null ? seleccionada.getFechaFin().toString() : null);
+                body.put("estado", "finalizado");
+                try {
+                    PawLinkClient.actualizarAlquiler(seleccionada.getId(), body);
                     cargarDatos();
                     onDatosActualizados.run();
                     UIUtils.mostrarInfo("Éxito", "Estado actualizado a finalizado");
-                } catch (SQLException ex) {
+                } catch (Exception ex) {
                     UIUtils.mostrarInfo("Error", "No se pudo actualizar: " + ex.getMessage());
                 }
             }
@@ -176,41 +179,24 @@ public class AdopcionCrudController {
     public void cargarDatos() {
         listaAdopciones.clear();
 
-        String sql = "SELECT a.id_alquiler, m.nombre AS mascota, u.nombre AS voluntario, "
-                + "a.fecha_inicio, a.fecha_fin, a.estado, a.calificacion "
-                + "FROM Alquileres a "
-                + "JOIN Mascotas m ON a.id_mascota = m.id_mascota "
-                + "JOIN Usuarios u ON a.id_voluntario = u.id_usuario";
-
-        try (Connection conn = ConexionBBDD.getConexion();
-                Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
-
-            int contador = 0;
-            while (rs.next()) {
-                Date fiSql = rs.getDate("fecha_inicio");
-                Date ffSql = rs.getDate("fecha_fin");
-
-                LocalDate fechaInicio = fiSql != null ? fiSql.toLocalDate() : null;
-                LocalDate fechaFin = ffSql != null ? ffSql.toLocalDate() : null;
-
-                Integer calif = rs.getObject("calificacion") != null ? rs.getInt("calificacion") : null;
-
-                AdopcionTabla a = new AdopcionTabla(
-                        rs.getInt("id_alquiler"),
-                        rs.getString("mascota"),
-                        rs.getString("voluntario"),
-                        fechaInicio,
-                        fechaFin,
-                        rs.getString("estado"),
-                        calif);
-                listaAdopciones.add(a);
-                contador++;
+        try {
+            List<Map<String, Object>> alquileres = PawLinkClient.getAlquileres();
+            for (Map<String, Object> a : alquileres) {
+                int id = ((Number) a.get("idAlquiler")).intValue();
+                String mascota = (String) a.get("nombreMascota");
+                String voluntario = (String) a.get("nombreVoluntario");
+                String fiStr = (String) a.get("fechaInicio");
+                String ffStr = (String) a.get("fechaFin");
+                LocalDate fechaInicio = fiStr != null ? LocalDate.parse(fiStr) : null;
+                LocalDate fechaFin = ffStr != null ? LocalDate.parse(ffStr) : null;
+                String estado = (String) a.get("estado");
+                int idMascota = a.get("idMascota") instanceof Number ? ((Number) a.get("idMascota")).intValue() : 0;
+                int idVoluntario = a.get("idVoluntario") instanceof Number ? ((Number) a.get("idVoluntario")).intValue() : 0;
+                listaAdopciones.add(new AdopcionTabla(id, mascota, voluntario, fechaInicio, fechaFin, estado, null, idMascota, idVoluntario));
             }
-            System.out.println("Adopciones cargadas: " + contador);
+            System.out.println("Adopciones cargadas: " + listaAdopciones.size());
             UIUtils.ocultarErrorConexion(lblErrorConexionAdopciones);
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.println("Error cargando adopciones: " + e.getMessage());
             UIUtils.mostrarErrorConexion(lblErrorConexionAdopciones);
         }
@@ -232,7 +218,8 @@ public class AdopcionCrudController {
         ComboBox<Mascota> comboMascota = new ComboBox<>();
         comboMascota.setPrefWidth(250);
         comboMascota.setTooltip(new Tooltip("Busca y selecciona una mascota (puedes escribir para filtrar)"));
-        UIUtils.configurarAutocompletado(comboMascota, listaMascotas);
+        ObservableList<Mascota> mascotasDisponibles = listaMascotas.filtered(Mascota::getDisponible);
+        UIUtils.configurarAutocompletado(comboMascota, mascotasDisponibles);
 
         ComboBox<Usuario> comboVoluntario = new ComboBox<>();
         comboVoluntario.setPrefWidth(250);
@@ -248,16 +235,11 @@ public class AdopcionCrudController {
         TextField txtEstado = new TextField("activo");
         txtEstado.setTooltip(new Tooltip("Estado de la adopción (obligatorio)"));
 
-        TextField txtCalif = new TextField();
-        txtCalif.setPromptText("1-5");
-        txtCalif.setTooltip(new Tooltip("Calificación de 1 a 5 (opcional)"));
-
         grid.addRow(0, new Label("Mascota:"), comboMascota);
         grid.addRow(1, new Label("Voluntario:"), comboVoluntario);
         grid.addRow(2, new Label("Fecha inicio:"), dpInicio);
         grid.addRow(3, new Label("Fecha fin:"), dpFin);
         grid.addRow(4, new Label("Estado:"), txtEstado);
-        grid.addRow(5, new Label("Calificación (1-5):"), txtCalif);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -267,7 +249,6 @@ public class AdopcionCrudController {
         validadores.add(ValidadorForms.validarComboBoxObligatorio(comboMascota, "una mascota"));
         validadores.add(ValidadorForms.validarComboBoxObligatorio(comboVoluntario, "un voluntario"));
         validadores.add(ValidadorForms.validarEstadoAdopcion(txtEstado));
-        validadores.add(ValidadorForms.validarCalificacionAdopcion(txtCalif));
         validadores.add(ValidadorForms.validarRangoFechasAdopcion(dpInicio, dpFin));
 
         javafx.application.Platform.runLater(() -> {
@@ -292,55 +273,37 @@ public class AdopcionCrudController {
                 return;
             }
 
-            Integer calif = null;
-            if (!txtCalif.getText().isBlank()) {
-                try {
-                    calif = Integer.parseInt(txtCalif.getText());
-                } catch (NumberFormatException e) {
-                    UIUtils.mostrarInfo("Dato inválido", "La calificación debe ser un número entero.");
-                    return;
-                }
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("idMascota", m.getId());
+            body.put("idVoluntario", u.getId());
+            body.put("fechaInicio", dpInicio.getValue() != null ? dpInicio.getValue().toString() : null);
+            body.put("fechaFin", dpFin.getValue() != null ? dpFin.getValue().toString() : null);
+            body.put("estado", txtEstado.getText());
+            try {
+                PawLinkClient.crearAlquiler(body);
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo crear el alquiler:\n" + e.getMessage());
+                return;
             }
-
-            String sql = "INSERT INTO Alquileres "
-                    + "(id_mascota, id_voluntario, fecha_inicio, fecha_fin, estado, calificacion) "
-                    + "VALUES (?,?,?,?,?,?)";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, m.getId());
-                pst.setInt(2, u.getId());
-
-                LocalDate fi = dpInicio.getValue();
-                LocalDate ff = dpFin.getValue();
-
-                if (fi != null) {
-                    pst.setDate(3, java.sql.Date.valueOf(fi));
-                } else {
-                    pst.setNull(3, java.sql.Types.DATE);
-                }
-
-                if (ff != null) {
-                    pst.setDate(4, java.sql.Date.valueOf(ff));
-                } else {
-                    pst.setNull(4, java.sql.Types.DATE);
-                }
-
-                pst.setString(5, txtEstado.getText());
-
-                if (calif != null) {
-                    pst.setInt(6, calif);
-                } else {
-                    pst.setNull(6, java.sql.Types.INTEGER);
-                }
-
-                pst.executeUpdate();
-
-                cargarDatos();
-                onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo insertar la adopción:\n" + e.getMessage());
+            // Marcar la mascota como no disponible
+            Map<String, Object> bodyMascota = new LinkedHashMap<>();
+            bodyMascota.put("idCentro", m.getIdCentro());
+            bodyMascota.put("nombre", m.getNombre());
+            bodyMascota.put("especie", m.getEspecie());
+            bodyMascota.put("raza", m.getRaza());
+            bodyMascota.put("fechaNacimiento", m.getFechaNacimiento() != null ? m.getFechaNacimiento().toString() : null);
+            bodyMascota.put("peso", m.getPeso());
+            bodyMascota.put("estadoSalud", m.getEstadoSalud());
+            bodyMascota.put("disponibleAlquiler", 0);
+            bodyMascota.put("foto", m.getFoto());
+            bodyMascota.put("notas", m.getNotas());
+            try {
+                PawLinkClient.actualizarMascota(m.getId(), bodyMascota);
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Aviso", "Alquiler creado, pero no se pudo actualizar la disponibilidad:\n" + e.getMessage());
             }
+            cargarDatos();
+            onDatosActualizados.run();
         }
     }
 
@@ -353,7 +316,7 @@ public class AdopcionCrudController {
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Editar adopción");
-        dialog.setHeaderText("Edita las fechas, el estado y la calificación");
+        dialog.setHeaderText("Edita las fechas y el estado");
 
         ButtonType btnGuardar = new ButtonType("_Guardar", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancelar = new ButtonType("_Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -378,16 +341,11 @@ public class AdopcionCrudController {
         TextField txtEstado = new TextField(seleccionada.getEstado());
         txtEstado.setTooltip(new Tooltip("Estado de la adopción (obligatorio)"));
 
-        TextField txtCalif = new TextField(
-                seleccionada.getCalificacion() != null ? seleccionada.getCalificacion().toString() : "");
-        txtCalif.setTooltip(new Tooltip("Calificación de 1 a 5 (opcional)"));
-
         grid.addRow(0, new Label("Mascota:"), txtMascota);
         grid.addRow(1, new Label("Voluntario:"), txtVoluntario);
         grid.addRow(2, new Label("Fecha inicio:"), dpInicio);
         grid.addRow(3, new Label("Fecha fin:"), dpFin);
         grid.addRow(4, new Label("Estado:"), txtEstado);
-        grid.addRow(5, new Label("Calificación:"), txtCalif);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -395,7 +353,6 @@ public class AdopcionCrudController {
 
         List<ValidationSupport> validadores = new ArrayList<>();
         validadores.add(ValidadorForms.validarEstadoAdopcion(txtEstado));
-        validadores.add(ValidadorForms.validarCalificacionAdopcion(txtCalif));
         validadores.add(ValidadorForms.validarRangoFechasAdopcion(dpInicio, dpFin));
 
         javafx.application.Platform.runLater(() -> {
@@ -412,50 +369,18 @@ public class AdopcionCrudController {
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
-            Integer calif = null;
-            if (!txtCalif.getText().isBlank()) {
-                try {
-                    calif = Integer.parseInt(txtCalif.getText());
-                } catch (NumberFormatException e) {
-                    UIUtils.mostrarInfo("Dato inválido", "La calificación debe ser un número entero.");
-                    return;
-                }
-            }
-
-            String sql = "UPDATE Alquileres SET fecha_inicio = ?, fecha_fin = ?, estado = ?, calificacion = ? "
-                    + "WHERE id_alquiler = ?";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                LocalDate fi = dpInicio.getValue();
-                LocalDate ff = dpFin.getValue();
-                if (fi != null) {
-                    pst.setDate(1, java.sql.Date.valueOf(fi));
-                } else {
-                    pst.setNull(1, java.sql.Types.DATE);
-                }
-
-                if (ff != null) {
-                    pst.setDate(2, java.sql.Date.valueOf(ff));
-                } else {
-                    pst.setNull(2, java.sql.Types.DATE);
-                }
-
-                pst.setString(3, txtEstado.getText());
-
-                if (calif != null) {
-                    pst.setInt(4, calif);
-                } else {
-                    pst.setNull(4, java.sql.Types.INTEGER);
-                }
-
-                pst.setInt(5, seleccionada.getId());
-                pst.executeUpdate();
-
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("idMascota", seleccionada.getIdMascota());
+            body.put("idVoluntario", seleccionada.getIdVoluntario());
+            body.put("fechaInicio", dpInicio.getValue() != null ? dpInicio.getValue().toString() : null);
+            body.put("fechaFin", dpFin.getValue() != null ? dpFin.getValue().toString() : null);
+            body.put("estado", txtEstado.getText());
+            try {
+                PawLinkClient.actualizarAlquiler(seleccionada.getId(), body);
                 cargarDatos();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo actualizar la adopción:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo actualizar la adopción:\n" + e.getMessage());
             }
         }
     }
@@ -476,17 +401,12 @@ public class AdopcionCrudController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String sql = "DELETE FROM Alquileres WHERE id_alquiler = ?";
-
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, seleccionada.getId());
-                pst.executeUpdate();
-
+            try {
+                PawLinkClient.eliminarAlquiler(seleccionada.getId());
                 cargarDatos();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo eliminar la adopción:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error API", "No se pudo eliminar la adopción:\n" + e.getMessage());
             }
         }
     }
