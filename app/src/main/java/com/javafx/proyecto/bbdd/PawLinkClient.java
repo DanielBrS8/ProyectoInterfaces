@@ -76,44 +76,166 @@ public class PawLinkClient {
     }
 
     // -------------------------------------------------------------------------
+    // Métodos HTTP autenticados (con token JWT)
+    // -------------------------------------------------------------------------
+
+    private static HttpResponse<String> getAuth(String path, String token) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+        }
+        return response;
+    }
+
+    private static HttpResponse<String> postAuth(String path, Object body, String token) throws Exception {
+        String json = mapper.writeValueAsString(body);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+        }
+        return response;
+    }
+
+    private static HttpResponse<String> putAuth(String path, Object body, String token) throws Exception {
+        String json = mapper.writeValueAsString(body);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+        }
+        return response;
+    }
+
+    private static HttpResponse<String> deleteAuth(String path, String token) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Authorization", "Bearer " + token)
+                .DELETE()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+        }
+        return response;
+    }
+
+    // -------------------------------------------------------------------------
+    // Autenticación
+    // -------------------------------------------------------------------------
+
+    public static Map<String, Object> login(String email, String password) throws Exception {
+        Map<String, String> body = Map.of("email", email, "password", password);
+        HttpResponse<String> response = post("/api/auth/login", body);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
+
+    public static Map<String, Object> loginGoogle(String code) throws Exception {
+        Map<String, String> body = Map.of("code", code);
+        HttpResponse<String> response = post("/api/auth/google", body);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
+
+    // -------------------------------------------------------------------------
     // Mascotas
     // -------------------------------------------------------------------------
 
-    public static List<Map<String, Object>> getMascotas() throws Exception {
-        HttpResponse<String> response = get("/api/mascotas");
+    public static List<Map<String, Object>> getMascotas(String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/mascotas", token);
         return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
     }
 
-    public static void crearMascota(Map<String, Object> body) throws Exception {
-        post("/api/mascotas", body);
+    public static void crearMascota(Map<String, Object> body, String token) throws Exception {
+        postAuth("/api/mascotas", body, token);
     }
 
-    public static void actualizarMascota(int id, Map<String, Object> body) throws Exception {
-        put("/api/mascotas/" + id, body);
+    public static void actualizarMascota(int id, Map<String, Object> body, String token) throws Exception {
+        putAuth("/api/mascotas/" + id, body, token);
     }
 
-    public static void eliminarMascota(int id) throws Exception {
-        delete("/api/mascotas/" + id);
+    public static void eliminarMascota(int id, String token) throws Exception {
+        deleteAuth("/api/mascotas/" + id, token);
     }
 
     // -------------------------------------------------------------------------
-    // Alquileres
+    // Alquileres (Adopciones)
     // -------------------------------------------------------------------------
 
-    public static List<Map<String, Object>> getAlquileres() throws Exception {
-        HttpResponse<String> response = get("/api/alquileres");
+    public static List<Map<String, Object>> getAlquileres(String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/alquileres", token);
         return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
     }
 
-    public static void crearAlquiler(Map<String, Object> body) throws Exception {
-        post("/api/alquileres", body);
+    public static void crearAlquiler(Map<String, Object> body, String token) throws Exception {
+        postAuth("/api/alquileres", body, token);
     }
 
-    public static void actualizarAlquiler(int id, Map<String, Object> body) throws Exception {
-        put("/api/alquileres/" + id, body);
+    public static void actualizarAlquiler(int id, Map<String, Object> body, String token) throws Exception {
+        putAuth("/api/alquileres/" + id, body, token);
     }
 
-    public static void eliminarAlquiler(int id) throws Exception {
-        delete("/api/alquileres/" + id);
+    public static void eliminarAlquiler(int id, String token) throws Exception {
+        deleteAuth("/api/alquileres/" + id, token);
+    }
+
+    // -------------------------------------------------------------------------
+    // Admin — Gestión de usuarios
+    // -------------------------------------------------------------------------
+
+    public static List<Map<String, Object>> getUsuarios(String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/admin/usuarios", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static Map<String, Object> crearUsuario(Map<String, Object> body, String token) throws Exception {
+        HttpResponse<String> response = postAuth("/api/admin/usuarios", body, token);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
+
+    public static void actualizarUsuario(int id, Map<String, Object> body, String token) throws Exception {
+        putAuth("/api/admin/usuarios/" + id, body, token);
+    }
+
+    public static void eliminarUsuario(int id, String token) throws Exception {
+        deleteAuth("/api/admin/usuarios/" + id, token);
+    }
+
+    // -------------------------------------------------------------------------
+    // Centros Veterinarios
+    // -------------------------------------------------------------------------
+
+    public static List<Map<String, Object>> getCentros(String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/centros", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static void crearCentro(Map<String, Object> body, String token) throws Exception {
+        postAuth("/api/centros", body, token);
+    }
+
+    public static void actualizarCentro(int id, Map<String, Object> body, String token) throws Exception {
+        putAuth("/api/centros/" + id, body, token);
+    }
+
+    public static void eliminarCentro(int id, String token) throws Exception {
+        deleteAuth("/api/centros/" + id, token);
     }
 }

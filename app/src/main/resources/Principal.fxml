@@ -101,6 +101,17 @@
                     </graphic>
                 </Button>
 
+                <Button fx:id="btnCentros" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="_Centros" mnemonicParsing="true">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/home.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
                 <Button fx:id="btnInformes" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
                     text="I_nformes" mnemonicParsing="true">
                     <graphic>
@@ -209,25 +220,23 @@
 
             <AnchorPane fx:id="vistaUsuarios" visible="false">
                 <children>
-                    <Label text="Gestión de Usuarios"
+                    <Label text="Gestión de Veterinarios"
                         layoutX="30" layoutY="20"
                         style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
                     <HBox layoutX="30" layoutY="60" spacing="10">
                         <children>
                             <ComboBox fx:id="comboBuscarUsuarioNombre" promptText="Buscar por nombre"
-                                prefWidth="140" editable="true" />
+                                prefWidth="180" editable="true" />
                             <ComboBox fx:id="comboBuscarUsuarioEmail" promptText="Buscar por email"
-                                prefWidth="140" editable="true" />
-                            <ComboBox fx:id="comboBuscarUsuarioTelefono" promptText="Buscar por teléfono"
-                                prefWidth="140" editable="true" />
-                            <ComboBox fx:id="comboBuscarUsuarioDireccion" promptText="Buscar por dirección"
-                                prefWidth="140" editable="true" />
+                                prefWidth="180" editable="true" />
+                            <ComboBox fx:id="comboBuscarUsuarioCentro" promptText="Buscar por centro"
+                                prefWidth="180" editable="true" />
                             <Button fx:id="btnLimpiarUsuarios" text="_Buscar" mnemonicParsing="true" />
                         </children>
                     </HBox>
 
-                    <Label fx:id="lblErrorConexionUsuarios" text="⚠ Error: No se pudo conectar a la base de datos"
+                    <Label fx:id="lblErrorConexionUsuarios" text="⚠ Error: No se pudo conectar al servidor"
                         layoutX="30" layoutY="100"
                         style="-fx-font-size: 13px; -fx-text-fill: #d32f2f; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 8px; -fx-border-color: #d32f2f; -fx-border-width: 1px;"
                         visible="false" managed="false" />
@@ -237,12 +246,46 @@
                         prefHeight="400" prefWidth="740">
                         <columns>
                             <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
-                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="150" />
-                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="180" />
-                            <TableColumn fx:id="colUsuarioTelefono" text="Teléfono" prefWidth="120" />
-                            <TableColumn fx:id="colUsuarioDireccion" text="Dirección"
-                                prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="200" />
+                            <TableColumn fx:id="colUsuarioCentro" text="Centro" prefWidth="200" />
                             <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="80" />
+                        </columns>
+                    </TableView>
+                </children>
+            </AnchorPane>
+
+            <AnchorPane fx:id="vistaCentros" visible="false">
+                <children>
+                    <Label text="Gestión de Centros Veterinarios"
+                        layoutX="30" layoutY="20"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <HBox layoutX="30" layoutY="60" spacing="10">
+                        <children>
+                            <ComboBox fx:id="comboBuscarCentroNombre" promptText="Buscar por nombre"
+                                prefWidth="180" editable="true" />
+                            <ComboBox fx:id="comboBuscarCentroCiudad" promptText="Buscar por ciudad"
+                                prefWidth="180" editable="true" />
+                            <Button fx:id="btnLimpiarCentros" text="_Buscar" mnemonicParsing="true" />
+                        </children>
+                    </HBox>
+
+                    <Label fx:id="lblErrorConexionCentros" text="⚠ Error de conexión"
+                        layoutX="30" layoutY="100"
+                        style="-fx-font-size: 13px; -fx-text-fill: #d32f2f; -fx-font-weight: bold; -fx-background-color: #ffebee; -fx-padding: 8px; -fx-border-color: #d32f2f; -fx-border-width: 1px;"
+                        visible="false" managed="false" />
+
+                    <TableView fx:id="tablaCentros"
+                        layoutX="30" layoutY="140"
+                        prefHeight="400" prefWidth="740">
+                        <columns>
+                            <TableColumn fx:id="colCentroId" text="ID" prefWidth="50" />
+                            <TableColumn fx:id="colCentroNombre" text="Nombre" prefWidth="170" />
+                            <TableColumn fx:id="colCentroCiudad" text="Ciudad" prefWidth="120" />
+                            <TableColumn fx:id="colCentroDireccion" text="Dirección" prefWidth="170" />
+                            <TableColumn fx:id="colCentroTelefono" text="Teléfono" prefWidth="110" />
+                            <TableColumn fx:id="colCentroEspecialidad" text="Especialidad" prefWidth="120" />
                         </columns>
                     </TableView>
                 </children>

@@ -2,6 +2,7 @@ package com.javafx.proyecto.controlador;
 
 import com.javafx.proyecto.bbdd.PawLinkClient;
 import com.javafx.proyecto.modelo.Mascota;
+import com.javafx.proyecto.util.SesionUsuario;
 import com.javafx.proyecto.util.UIUtils;
 import com.javafx.proyecto.util.ValidadorForms;
 
@@ -166,7 +167,7 @@ public class MascotaCrudController {
                 body.put("foto", seleccionada.getFoto());
                 body.put("notas", seleccionada.getNotas());
                 try {
-                    PawLinkClient.actualizarMascota(seleccionada.getId(), body);
+                    PawLinkClient.actualizarMascota(seleccionada.getId(), body, SesionUsuario.getInstancia().getToken());
                     cargarDatos();
                     UIUtils.mostrarInfo("Éxito", "Disponibilidad actualizada");
                 } catch (Exception ex) {
@@ -193,7 +194,7 @@ public class MascotaCrudController {
         listaMascotas.clear();
 
         try {
-            List<Map<String, Object>> mascotas = PawLinkClient.getMascotas();
+            List<Map<String, Object>> mascotas = PawLinkClient.getMascotas(SesionUsuario.getInstancia().getToken());
             for (Map<String, Object> m : mascotas) {
                 int id = ((Number) m.get("idMascota")).intValue();
                 String nombre = (String) m.get("nombre");
@@ -337,7 +338,7 @@ public class MascotaCrudController {
             body.put("foto", null);
             body.put("notas", null);
             try {
-                PawLinkClient.crearMascota(body);
+                PawLinkClient.crearMascota(body, SesionUsuario.getInstancia().getToken());
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();
@@ -447,7 +448,7 @@ public class MascotaCrudController {
             body.put("foto", seleccionada.getFoto());
             body.put("notas", seleccionada.getNotas());
             try {
-                PawLinkClient.actualizarMascota(seleccionada.getId(), body);
+                PawLinkClient.actualizarMascota(seleccionada.getId(), body, SesionUsuario.getInstancia().getToken());
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();
@@ -474,7 +475,7 @@ public class MascotaCrudController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                PawLinkClient.eliminarMascota(seleccionada.getId());
+                PawLinkClient.eliminarMascota(seleccionada.getId(), SesionUsuario.getInstancia().getToken());
                 cargarDatos();
                 rellenarGraficaEspecies();
                 onDatosActualizados.run();

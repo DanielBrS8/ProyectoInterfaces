@@ -5,6 +5,7 @@ import com.javafx.proyecto.modelo.AdopcionTabla;
 import com.javafx.proyecto.modelo.Mascota;
 import com.javafx.proyecto.modelo.UltimoRegistro;
 import com.javafx.proyecto.modelo.Usuario;
+import com.javafx.proyecto.util.SesionUsuario;
 import com.javafx.proyecto.util.UIUtils;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -32,11 +33,13 @@ public class PrincipalController {
     @FXML private AnchorPane vistaMascotas;
     @FXML private AnchorPane vistaAdopciones;
     @FXML private AnchorPane vistaInformes;
+    @FXML private AnchorPane vistaCentros;
     @FXML private HBox barraCrud;
 
     // --- Botones de navegación ---
     @FXML private Button btnInicio;
     @FXML private Button btnUsuarios;
+    @FXML private Button btnCentros;
     @FXML private Button btnMascotas;
     @FXML private Button btnAdopciones;
     @FXML private Button btnInformes;
@@ -63,18 +66,16 @@ public class PrincipalController {
     @FXML private CategoryAxis ejeXEspecies;
     @FXML private NumberAxis ejeYEspecies;
 
-    // --- Tabla Usuarios ---
+    // --- Tabla Usuarios (Veterinarios) ---
     @FXML private TableView<Usuario> tablaUsuarios;
     @FXML private TableColumn<Usuario, Integer> colUsuarioId;
     @FXML private TableColumn<Usuario, String> colUsuarioNombre;
     @FXML private TableColumn<Usuario, String> colUsuarioEmail;
-    @FXML private TableColumn<Usuario, String> colUsuarioTelefono;
-    @FXML private TableColumn<Usuario, String> colUsuarioDireccion;
+    @FXML private TableColumn<Usuario, String> colUsuarioCentro;
     @FXML private TableColumn<Usuario, Boolean> colUsuarioActivo;
     @FXML private ComboBox<String> comboBuscarUsuarioNombre;
     @FXML private ComboBox<String> comboBuscarUsuarioEmail;
-    @FXML private ComboBox<String> comboBuscarUsuarioTelefono;
-    @FXML private ComboBox<String> comboBuscarUsuarioDireccion;
+    @FXML private ComboBox<String> comboBuscarUsuarioCentro;
     @FXML private Button btnLimpiarUsuarios;
 
     // --- Tabla Mascotas ---
@@ -143,10 +144,10 @@ public class PrincipalController {
         // Crear sub-controladores
         usuarioCtrl = new UsuarioCrudController(
                 tablaUsuarios, listaUsuarios,
-                colUsuarioId, colUsuarioNombre, colUsuarioEmail, colUsuarioTelefono,
-                colUsuarioDireccion, colUsuarioActivo,
+                colUsuarioId, colUsuarioNombre, colUsuarioEmail,
+                colUsuarioCentro, colUsuarioActivo,
                 comboBuscarUsuarioNombre, comboBuscarUsuarioEmail,
-                comboBuscarUsuarioTelefono, comboBuscarUsuarioDireccion,
+                comboBuscarUsuarioCentro,
                 btnLimpiarUsuarios, lblErrorConexionUsuarios,
                 this::recargarDashboard);
 
@@ -204,9 +205,30 @@ public class PrincipalController {
         mascotaCtrl.rellenarGraficaEspecies();
         cargarUltimosRegistros();
 
-        // Vista por defecto
-        mostrarVista(vistaInicio, btnInicio, Seccion.INICIO);
+        // Configurar visibilidad según rol
+        configurarPermisosPorRol();
+
         UIUtils.aplicarAnimacionEntrada(stackContenido);
+    }
+
+    private void configurarPermisosPorRol() {
+        SesionUsuario sesion = SesionUsuario.getInstancia();
+
+        if (sesion.isAdmin()) {
+            // Admin solo gestiona usuarios
+            btnMascotas.setVisible(false);
+            btnMascotas.setManaged(false);
+            btnAdopciones.setVisible(false);
+            btnAdopciones.setManaged(false);
+            btnInformes.setVisible(false);
+            btnInformes.setManaged(false);
+            mostrarVista(vistaUsuarios, btnUsuarios, Seccion.USUARIOS);
+        } else {
+            // Veterinario ve mascotas, adopciones, informes — no usuarios
+            btnUsuarios.setVisible(false);
+            btnUsuarios.setManaged(false);
+            mostrarVista(vistaInicio, btnInicio, Seccion.INICIO);
+        }
     }
 
     private void mostrarVista(AnchorPane vista, Button botonMenu, Seccion seccion) {

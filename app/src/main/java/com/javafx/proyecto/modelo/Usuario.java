@@ -8,6 +8,8 @@ public class Usuario {
     private String telefono;
     private String direccion;
     private Boolean activo;
+    private String rol;
+    private String nombreCentro;
 
     public Usuario(Integer id, String nombre, String email,
             String telefono, String direccion, Boolean activo) {
@@ -17,6 +19,27 @@ public class Usuario {
         this.telefono = telefono;
         this.direccion = direccion;
         this.activo = activo;
+    }
+
+    public Usuario(Integer id, String nombre, String email,
+            String telefono, String direccion, Boolean activo, String rol) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.telefono = telefono;
+        this.direccion = direccion;
+        this.activo = activo;
+        this.rol = rol;
+    }
+
+    public Usuario(Integer id, String nombre, String email,
+            Boolean activo, String rol, String nombreCentro) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.activo = activo;
+        this.rol = rol;
+        this.nombreCentro = nombreCentro;
     }
 
     public Integer getId() {
@@ -41,6 +64,14 @@ public class Usuario {
 
     public Boolean getActivo() {
         return activo;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public String getNombreCentro() {
+        return nombreCentro;
     }
 
     @Override

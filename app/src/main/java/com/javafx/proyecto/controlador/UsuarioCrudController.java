@@ -1,9 +1,9 @@
 package com.javafx.proyecto.controlador;
 
-import com.javafx.proyecto.bbdd.ConexionBBDD;
+import com.javafx.proyecto.bbdd.PawLinkClient;
 import com.javafx.proyecto.modelo.Usuario;
+import com.javafx.proyecto.util.SesionUsuario;
 import com.javafx.proyecto.util.UIUtils;
-import com.javafx.proyecto.util.ValidadorForms;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,11 +13,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 
-import org.controlsfx.validation.ValidationSupport;
-
-import java.sql.*;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class UsuarioCrudController {
@@ -27,19 +26,20 @@ public class UsuarioCrudController {
     private final TableColumn<Usuario, Integer> colUsuarioId;
     private final TableColumn<Usuario, String> colUsuarioNombre;
     private final TableColumn<Usuario, String> colUsuarioEmail;
-    private final TableColumn<Usuario, String> colUsuarioTelefono;
-    private final TableColumn<Usuario, String> colUsuarioDireccion;
+    private final TableColumn<Usuario, String> colUsuarioCentro;
     private final TableColumn<Usuario, Boolean> colUsuarioActivo;
 
     private final ComboBox<String> comboBuscarUsuarioNombre;
     private final ComboBox<String> comboBuscarUsuarioEmail;
-    private final ComboBox<String> comboBuscarUsuarioTelefono;
-    private final ComboBox<String> comboBuscarUsuarioDireccion;
+    private final ComboBox<String> comboBuscarUsuarioCentro;
     private final Button btnLimpiarUsuarios;
 
     private final Label lblErrorConexionUsuarios;
 
     private final Runnable onDatosActualizados;
+
+    // Cache de centros: nombre -> idCentro
+    private final Map<String, Integer> mapaCentros = new LinkedHashMap<>();
 
     public UsuarioCrudController(
             TableView<Usuario> tablaUsuarios,
@@ -47,13 +47,11 @@ public class UsuarioCrudController {
             TableColumn<Usuario, Integer> colUsuarioId,
             TableColumn<Usuario, String> colUsuarioNombre,
             TableColumn<Usuario, String> colUsuarioEmail,
-            TableColumn<Usuario, String> colUsuarioTelefono,
-            TableColumn<Usuario, String> colUsuarioDireccion,
+            TableColumn<Usuario, String> colUsuarioCentro,
             TableColumn<Usuario, Boolean> colUsuarioActivo,
             ComboBox<String> comboBuscarUsuarioNombre,
             ComboBox<String> comboBuscarUsuarioEmail,
-            ComboBox<String> comboBuscarUsuarioTelefono,
-            ComboBox<String> comboBuscarUsuarioDireccion,
+            ComboBox<String> comboBuscarUsuarioCentro,
             Button btnLimpiarUsuarios,
             Label lblErrorConexionUsuarios,
             Runnable onDatosActualizados) {
@@ -63,13 +61,11 @@ public class UsuarioCrudController {
         this.colUsuarioId = colUsuarioId;
         this.colUsuarioNombre = colUsuarioNombre;
         this.colUsuarioEmail = colUsuarioEmail;
-        this.colUsuarioTelefono = colUsuarioTelefono;
-        this.colUsuarioDireccion = colUsuarioDireccion;
+        this.colUsuarioCentro = colUsuarioCentro;
         this.colUsuarioActivo = colUsuarioActivo;
         this.comboBuscarUsuarioNombre = comboBuscarUsuarioNombre;
         this.comboBuscarUsuarioEmail = comboBuscarUsuarioEmail;
-        this.comboBuscarUsuarioTelefono = comboBuscarUsuarioTelefono;
-        this.comboBuscarUsuarioDireccion = comboBuscarUsuarioDireccion;
+        this.comboBuscarUsuarioCentro = comboBuscarUsuarioCentro;
         this.btnLimpiarUsuarios = btnLimpiarUsuarios;
         this.lblErrorConexionUsuarios = lblErrorConexionUsuarios;
         this.onDatosActualizados = onDatosActualizados;
@@ -85,8 +81,7 @@ public class UsuarioCrudController {
         colUsuarioId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colUsuarioNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colUsuarioEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        colUsuarioTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colUsuarioDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
+        colUsuarioCentro.setCellValueFactory(new PropertyValueFactory<>("nombreCentro"));
         colUsuarioActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
     }
 
@@ -95,39 +90,34 @@ public class UsuarioCrudController {
 
         ContextMenu menuContextual = new ContextMenu();
 
-        MenuItem itemEditar = new MenuItem("_Editar usuario");
-        itemEditar.setMnemonicParsing(true);
-        itemEditar.setGraphic(UIUtils.crearIcono("/miapp/icons/editar.png", 16));
-        itemEditar.setOnAction(e -> editar());
-
-        MenuItem itemEliminar = new MenuItem("E_liminar usuario");
-        itemEliminar.setMnemonicParsing(true);
-        itemEliminar.setGraphic(UIUtils.crearIcono("/miapp/icons/eliminar.png", 16));
-        itemEliminar.setOnAction(e -> eliminar());
-
         MenuItem itemVerDetalles = new MenuItem("_Ver detalles");
         itemVerDetalles.setMnemonicParsing(true);
         itemVerDetalles.setGraphic(UIUtils.crearIcono("/miapp/icons/form.png", 16));
         itemVerDetalles.setOnAction(e -> {
             Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (seleccionado != null) {
-                UIUtils.mostrarInfo("Detalles del Usuario",
+                UIUtils.mostrarInfo("Detalles del Veterinario",
                         "ID: " + seleccionado.getId() + "\n" +
                                 "Nombre: " + seleccionado.getNombre() + "\n" +
                                 "Email: " + seleccionado.getEmail() + "\n" +
-                                "Teléfono: " + seleccionado.getTelefono() + "\n" +
-                                "Dirección: " + seleccionado.getDireccion() + "\n" +
-                                "Activo: " + (seleccionado.getActivo() ? "Sí" : "No"));
+                                "Centro: " + (seleccionado.getNombreCentro() != null ? seleccionado.getNombreCentro() : "Sin asignar") + "\n" +
+                                "Activo: " + (Boolean.TRUE.equals(seleccionado.getActivo()) ? "Sí" : "No"));
             }
         });
 
-        menuContextual.getItems().addAll(itemEditar, itemEliminar, new SeparatorMenuItem(), itemVerDetalles);
+        menuContextual.getItems().add(itemVerDetalles);
         tablaUsuarios.setContextMenu(menuContextual);
 
         tablaUsuarios.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                if (tablaUsuarios.getSelectionModel().getSelectedItem() != null) {
-                    editar();
+                Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
+                if (sel != null) {
+                    UIUtils.mostrarInfo("Detalles del Veterinario",
+                            "ID: " + sel.getId() + "\n" +
+                                    "Nombre: " + sel.getNombre() + "\n" +
+                                    "Email: " + sel.getEmail() + "\n" +
+                                    "Centro: " + (sel.getNombreCentro() != null ? sel.getNombreCentro() : "Sin asignar") + "\n" +
+                                    "Activo: " + (Boolean.TRUE.equals(sel.getActivo()) ? "Sí" : "No"));
                 }
             }
         });
@@ -135,40 +125,66 @@ public class UsuarioCrudController {
 
     public void cargarDatos() {
         listaUsuarios.clear();
+        String token = SesionUsuario.getInstancia().getToken();
+        System.out.println("[DEBUG] Token para getUsuarios: " + (token != null ? token.substring(0, Math.min(20, token.length())) + "..." : "NULL"));
 
-        String sql = "SELECT id_usuario, nombre, email, telefono, direccion, activo FROM Usuarios";
+        try {
+            List<Map<String, Object>> usuarios = PawLinkClient.getUsuarios(token);
 
-        try (Connection conn = ConexionBBDD.getConexion();
-                Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
+            for (Map<String, Object> u : usuarios) {
+                String rol = (String) u.get("rol");
+                if (!"veterinario".equals(rol)) continue;
 
-            int contador = 0;
-            while (rs.next()) {
-                Usuario u = new Usuario(
-                        rs.getInt("id_usuario"),
-                        rs.getString("nombre"),
-                        rs.getString("email"),
-                        rs.getString("telefono"),
-                        rs.getString("direccion"),
-                        rs.getBoolean("activo"));
-                listaUsuarios.add(u);
-                contador++;
+                Integer id = (Integer) u.get("id");
+                String nombre = (String) u.get("nombre");
+                String email = (String) u.get("email");
+                Object activoRaw = u.get("activo");
+                Boolean activo = activoRaw instanceof Boolean ? (Boolean) activoRaw : activoRaw != null && ((Number) activoRaw).intValue() == 1;
+                String nombreCentro = (String) u.get("nombreCentro");
+
+                listaUsuarios.add(new Usuario(id, nombre, email, activo, rol, nombreCentro));
             }
-            System.out.println("Usuarios cargados: " + contador);
             UIUtils.ocultarErrorConexion(lblErrorConexionUsuarios);
 
-        } catch (SQLException e) {
-            System.out.println("Error cargando usuarios: " + e.getMessage());
-            UIUtils.mostrarErrorConexion(lblErrorConexionUsuarios);
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblErrorConexionUsuarios.setText("Error: " + e.getMessage());
+            lblErrorConexionUsuarios.setVisible(true);
+            lblErrorConexionUsuarios.setManaged(true);
         }
 
         tablaUsuarios.setItems(listaUsuarios);
     }
 
+    private void cargarCentros() {
+        mapaCentros.clear();
+        String token = SesionUsuario.getInstancia().getToken();
+
+        try {
+            List<Map<String, Object>> centros = PawLinkClient.getCentros(token);
+            for (Map<String, Object> c : centros) {
+                Integer idCentro = (Integer) c.get("idCentro");
+                String nombre = (String) c.get("nombre");
+                if (idCentro != null && nombre != null) {
+                    mapaCentros.put(nombre, idCentro);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error cargando centros: " + e.getMessage());
+        }
+    }
+
     public void nuevo() {
+        cargarCentros();
+
+        if (mapaCentros.isEmpty()) {
+            UIUtils.mostrarInfo("Sin centros", "No hay centros veterinarios registrados. Crea uno primero.");
+            return;
+        }
+
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nuevo usuario");
-        dialog.setHeaderText("Introduce los datos del nuevo usuario");
+        dialog.setTitle("Nuevo veterinario");
+        dialog.setHeaderText("Introduce los datos del nuevo veterinario");
 
         ButtonType btnGuardar = new ButtonType("_Guardar", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancelar = new ButtonType("_Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -178,69 +194,71 @@ public class UsuarioCrudController {
 
         TextField txtNombre = new TextField();
         txtNombre.setPromptText("Ej: Juan Pérez");
-        txtNombre.setTooltip(new Tooltip("Introduce el nombre completo del usuario (entre 3 y 50 caracteres)"));
 
         TextField txtEmail = new TextField();
-        txtEmail.setPromptText("usuario@ejemplo.com");
-        txtEmail.setTooltip(new Tooltip("Introduce un email válido en formato: usuario@dominio.com"));
+        txtEmail.setPromptText("veterinario@ejemplo.com");
 
-        TextField txtTelefono = new TextField();
-        txtTelefono.setPromptText("123456789");
-        txtTelefono.setTooltip(new Tooltip("Introduce 9 dígitos numéricos sin espacios"));
+        PasswordField txtPassword = new PasswordField();
+        txtPassword.setPromptText("Contraseña");
 
-        TextField txtDireccion = new TextField();
-        txtDireccion.setPromptText("Ej: Calle Principal 123");
-        txtDireccion.setTooltip(new Tooltip("Introduce la dirección completa del usuario"));
-
-        CheckBox chkActivo = new CheckBox("_Activo");
-        chkActivo.setSelected(true);
+        ComboBox<String> comboCentro = new ComboBox<>();
+        comboCentro.getItems().addAll(mapaCentros.keySet());
+        comboCentro.setPromptText("Selecciona un centro");
+        comboCentro.setPrefWidth(220);
 
         grid.addRow(0, new Label("Nombre:"), txtNombre);
         grid.addRow(1, new Label("Email:"), txtEmail);
-        grid.addRow(2, new Label("Teléfono:"), txtTelefono);
-        grid.addRow(3, new Label("Dirección:"), txtDireccion);
-        grid.addRow(4, new Label(""), chkActivo);
+        grid.addRow(2, new Label("Contraseña:"), txtPassword);
+        grid.addRow(3, new Label("Centro:"), comboCentro);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
         UIUtils.añadirIconoADialogo(dialog);
 
-        List<ValidationSupport> validadores = new ArrayList<>();
-        validadores.add(ValidadorForms.validarNombreUsuario(txtNombre));
-        validadores.add(ValidadorForms.validarEmailUsuario(txtEmail));
-        validadores.add(ValidadorForms.validarTelefonoUsuario(txtTelefono));
-        validadores.add(ValidadorForms.validarCampoObligatorio(txtDireccion, "Dirección"));
+        dialog.getDialogPane().lookupButton(btnGuardar).setDisable(true);
 
-        javafx.application.Platform.runLater(() -> {
-            for (ValidationSupport vs : validadores) {
-                vs.initInitialDecoration();
-            }
-            txtNombre.requestFocus();
-        });
+        Runnable validar = () -> {
+            boolean valido = !txtNombre.getText().trim().isEmpty()
+                    && !txtEmail.getText().trim().isEmpty()
+                    && !txtPassword.getText().trim().isEmpty()
+                    && comboCentro.getValue() != null;
+            dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!valido);
+        };
 
-        validadores.forEach(vs -> vs.invalidProperty().addListener((obs, o, n) -> {
-            boolean todoOK = validadores.stream()
-                    .allMatch(v -> v.getValidationResult().getErrors().isEmpty());
-            dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!todoOK);
-        }));
+        txtNombre.textProperty().addListener((obs, o, n) -> validar.run());
+        txtEmail.textProperty().addListener((obs, o, n) -> validar.run());
+        txtPassword.textProperty().addListener((obs, o, n) -> validar.run());
+        comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
+
+        javafx.application.Platform.runLater(txtNombre::requestFocus);
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
-            String sql = "INSERT INTO Usuarios (nombre, email, telefono, direccion, activo) VALUES (?,?,?,?,?)";
+            String token = SesionUsuario.getInstancia().getToken();
+            Integer idCentro = mapaCentros.get(comboCentro.getValue());
 
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setString(1, txtNombre.getText());
-                pst.setString(2, txtEmail.getText());
-                pst.setString(3, txtTelefono.getText());
-                pst.setString(4, txtDireccion.getText());
-                pst.setInt(5, chkActivo.isSelected() ? 1 : 0);
-                pst.executeUpdate();
+            Map<String, Object> body = new HashMap<>();
+            body.put("nombre", txtNombre.getText().trim());
+            body.put("email", txtEmail.getText().trim());
+            body.put("password", txtPassword.getText());
+            body.put("rol", "veterinario");
+            body.put("idCentro", idCentro);
 
+            try {
+                PawLinkClient.crearUsuario(body, token);
                 cargarDatos();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo insertar el usuario:\n" + e.getMessage());
+                UIUtils.mostrarInfo("Veterinario creado",
+                        "Se ha creado el veterinario " + txtNombre.getText().trim() + " correctamente.");
+            } catch (RuntimeException e) {
+                String msg = e.getMessage();
+                if (msg != null && msg.contains("409")) {
+                    UIUtils.mostrarInfo("Error", "Ya existe un usuario con ese email.");
+                } else {
+                    UIUtils.mostrarInfo("Error", "No se pudo crear el veterinario:\n" + msg);
+                }
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error", "Error de conexión con el servidor.");
             }
         }
     }
@@ -249,13 +267,15 @@ public class UsuarioCrudController {
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            UIUtils.mostrarInfo("Editar usuario", "Selecciona primero un usuario de la tabla.");
+            UIUtils.mostrarInfo("Editar veterinario", "Selecciona primero un veterinario de la tabla.");
             return;
         }
 
+        cargarCentros();
+
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Editar usuario");
-        dialog.setHeaderText("Edita los datos del usuario");
+        dialog.setTitle("Editar veterinario");
+        dialog.setHeaderText("Edita los datos del veterinario");
 
         ButtonType btnGuardar = new ButtonType("_Guardar", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancelar = new ButtonType("_Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -264,67 +284,65 @@ public class UsuarioCrudController {
         GridPane grid = UIUtils.crearGridBasico();
 
         TextField txtNombre = new TextField(seleccionado.getNombre());
-        txtNombre.setTooltip(new Tooltip("Introduce el nombre completo del usuario (entre 3 y 50 caracteres)"));
-
         TextField txtEmail = new TextField(seleccionado.getEmail());
-        txtEmail.setTooltip(new Tooltip("Introduce un email válido en formato: usuario@dominio.com"));
 
-        TextField txtTelefono = new TextField(seleccionado.getTelefono());
-        txtTelefono.setTooltip(new Tooltip("Introduce 9 dígitos numéricos sin espacios"));
+        PasswordField txtPassword = new PasswordField();
+        txtPassword.setPromptText("Dejar vacío para no cambiar");
 
-        TextField txtDireccion = new TextField(seleccionado.getDireccion());
-        txtDireccion.setTooltip(new Tooltip("Introduce la dirección completa del usuario"));
-
-        CheckBox chkActivo = new CheckBox("_Activo");
-        chkActivo.setSelected(seleccionado.getActivo());
+        ComboBox<String> comboCentro = new ComboBox<>();
+        comboCentro.getItems().addAll(mapaCentros.keySet());
+        comboCentro.setPrefWidth(220);
+        if (seleccionado.getNombreCentro() != null) {
+            comboCentro.setValue(seleccionado.getNombreCentro());
+        }
 
         grid.addRow(0, new Label("Nombre:"), txtNombre);
         grid.addRow(1, new Label("Email:"), txtEmail);
-        grid.addRow(2, new Label("Teléfono:"), txtTelefono);
-        grid.addRow(3, new Label("Dirección:"), txtDireccion);
-        grid.addRow(4, new Label(""), chkActivo);
+        grid.addRow(2, new Label("Contraseña:"), txtPassword);
+        grid.addRow(3, new Label("Centro:"), comboCentro);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
         UIUtils.añadirIconoADialogo(dialog);
 
-        List<ValidationSupport> validadores = new ArrayList<>();
-        validadores.add(ValidadorForms.validarNombreUsuario(txtNombre));
-        validadores.add(ValidadorForms.validarEmailUsuario(txtEmail));
-        validadores.add(ValidadorForms.validarTelefonoUsuario(txtTelefono));
-        validadores.add(ValidadorForms.validarCampoObligatorio(txtDireccion, "Dirección"));
+        Runnable validar = () -> {
+            boolean valido = !txtNombre.getText().trim().isEmpty()
+                    && !txtEmail.getText().trim().isEmpty()
+                    && comboCentro.getValue() != null;
+            dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!valido);
+        };
 
-        javafx.application.Platform.runLater(() -> {
-            for (ValidationSupport vs : validadores) {
-                vs.initInitialDecoration();
-            }
-        });
-
-        validadores.forEach(vs -> vs.invalidProperty().addListener((obs, o, n) -> {
-            boolean todoOK = validadores.stream()
-                    .allMatch(v -> v.getValidationResult().getErrors().isEmpty());
-            dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!todoOK);
-        }));
+        txtNombre.textProperty().addListener((obs, o, n) -> validar.run());
+        txtEmail.textProperty().addListener((obs, o, n) -> validar.run());
+        comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
-            String sql = "UPDATE Usuarios SET nombre = ?, email = ?, telefono = ?, direccion = ?, activo = ? "
-                    + "WHERE id_usuario = ?";
+            String token = SesionUsuario.getInstancia().getToken();
+            Integer idCentro = mapaCentros.get(comboCentro.getValue());
 
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setString(1, txtNombre.getText());
-                pst.setString(2, txtEmail.getText());
-                pst.setString(3, txtTelefono.getText());
-                pst.setString(4, txtDireccion.getText());
-                pst.setInt(5, chkActivo.isSelected() ? 1 : 0);
-                pst.setInt(6, seleccionado.getId());
-                pst.executeUpdate();
+            Map<String, Object> body = new HashMap<>();
+            body.put("nombre", txtNombre.getText().trim());
+            body.put("email", txtEmail.getText().trim());
+            body.put("rol", "veterinario");
+            body.put("idCentro", idCentro);
+            if (!txtPassword.getText().isEmpty()) {
+                body.put("password", txtPassword.getText());
+            }
 
+            try {
+                PawLinkClient.actualizarUsuario(seleccionado.getId(), body, token);
                 cargarDatos();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo actualizar el usuario:\n" + e.getMessage());
+            } catch (RuntimeException e) {
+                String msg = e.getMessage();
+                if (msg != null && msg.contains("409")) {
+                    UIUtils.mostrarInfo("Error", "Ya existe un usuario con ese email.");
+                } else {
+                    UIUtils.mostrarInfo("Error", "No se pudo actualizar el veterinario:\n" + msg);
+                }
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error", "Error de conexión con el servidor.");
             }
         }
     }
@@ -333,29 +351,26 @@ public class UsuarioCrudController {
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            UIUtils.mostrarInfo("Eliminar usuario", "Selecciona primero un usuario de la tabla.");
+            UIUtils.mostrarInfo("Eliminar veterinario", "Selecciona primero un veterinario de la tabla.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar usuario");
+        confirm.setTitle("Eliminar veterinario");
         confirm.setHeaderText(null);
-        confirm.setContentText("¿Seguro que quieres eliminar al usuario " + seleccionado.getNombre() + "?");
+        confirm.setContentText("¿Seguro que quieres eliminar al veterinario " + seleccionado.getNombre() + "?");
         UIUtils.añadirIconoADialogo(confirm);
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String sql = "DELETE FROM Usuarios WHERE id_usuario = ?";
+            String token = SesionUsuario.getInstancia().getToken();
 
-            try (Connection conn = ConexionBBDD.getConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, seleccionado.getId());
-                pst.executeUpdate();
-
+            try {
+                PawLinkClient.eliminarUsuario(seleccionado.getId(), token);
                 cargarDatos();
                 onDatosActualizados.run();
-
-            } catch (SQLException e) {
-                UIUtils.mostrarInfo("Error BBDD", "No se pudo eliminar el usuario:\n" + e.getMessage());
+            } catch (Exception e) {
+                UIUtils.mostrarInfo("Error", "No se pudo eliminar el veterinario:\n" + e.getMessage());
             }
         }
     }
@@ -364,24 +379,22 @@ public class UsuarioCrudController {
 
     private void configurarBuscadores() {
         if (comboBuscarUsuarioNombre != null) {
-            ObservableList<String> nombresUsuarios = FXCollections.observableArrayList();
-            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioNombre, nombresUsuarios,
+            ObservableList<String> nombres = FXCollections.observableArrayList();
+            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioNombre, nombres,
                 () -> listaUsuarios.stream().map(Usuario::getNombre).distinct().toList());
         }
         if (comboBuscarUsuarioEmail != null) {
-            ObservableList<String> emailsUsuarios = FXCollections.observableArrayList();
-            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioEmail, emailsUsuarios,
+            ObservableList<String> emails = FXCollections.observableArrayList();
+            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioEmail, emails,
                 () -> listaUsuarios.stream().map(Usuario::getEmail).distinct().toList());
         }
-        if (comboBuscarUsuarioTelefono != null) {
-            ObservableList<String> telefonosUsuarios = FXCollections.observableArrayList();
-            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioTelefono, telefonosUsuarios,
-                () -> listaUsuarios.stream().map(Usuario::getTelefono).distinct().toList());
-        }
-        if (comboBuscarUsuarioDireccion != null) {
-            ObservableList<String> direccionesUsuarios = FXCollections.observableArrayList();
-            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioDireccion, direccionesUsuarios,
-                () -> listaUsuarios.stream().map(Usuario::getDireccion).distinct().toList());
+        if (comboBuscarUsuarioCentro != null) {
+            ObservableList<String> centros = FXCollections.observableArrayList();
+            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioCentro, centros,
+                () -> listaUsuarios.stream()
+                        .map(Usuario::getNombreCentro)
+                        .filter(c -> c != null)
+                        .distinct().toList());
         }
         if (btnLimpiarUsuarios != null) {
             btnLimpiarUsuarios.setOnAction(e -> buscar());
@@ -391,8 +404,8 @@ public class UsuarioCrudController {
     public void recargarBuscadores() {
         recargarCombo(comboBuscarUsuarioNombre, () -> listaUsuarios.stream().map(Usuario::getNombre).distinct().toList());
         recargarCombo(comboBuscarUsuarioEmail, () -> listaUsuarios.stream().map(Usuario::getEmail).distinct().toList());
-        recargarCombo(comboBuscarUsuarioTelefono, () -> listaUsuarios.stream().map(Usuario::getTelefono).distinct().toList());
-        recargarCombo(comboBuscarUsuarioDireccion, () -> listaUsuarios.stream().map(Usuario::getDireccion).distinct().toList());
+        recargarCombo(comboBuscarUsuarioCentro, () -> listaUsuarios.stream()
+                .map(Usuario::getNombreCentro).filter(c -> c != null).distinct().toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -408,15 +421,14 @@ public class UsuarioCrudController {
     private void buscar() {
         String nombre = getValor(comboBuscarUsuarioNombre);
         String email = getValor(comboBuscarUsuarioEmail);
-        String telefono = getValor(comboBuscarUsuarioTelefono);
-        String direccion = getValor(comboBuscarUsuarioDireccion);
+        String centro = getValor(comboBuscarUsuarioCentro);
 
         ObservableList<Usuario> filtrados = listaUsuarios.filtered(usuario -> {
             boolean coincide = true;
-            if (!nombre.isEmpty()) coincide = coincide && usuario.getNombre().toLowerCase().contains(nombre);
+            if (!nombre.isEmpty()) coincide = usuario.getNombre().toLowerCase().contains(nombre);
             if (!email.isEmpty()) coincide = coincide && usuario.getEmail().toLowerCase().contains(email);
-            if (!telefono.isEmpty()) coincide = coincide && usuario.getTelefono().toLowerCase().contains(telefono);
-            if (!direccion.isEmpty()) coincide = coincide && usuario.getDireccion().toLowerCase().contains(direccion);
+            if (!centro.isEmpty()) coincide = coincide && usuario.getNombreCentro() != null
+                    && usuario.getNombreCentro().toLowerCase().contains(centro);
             return coincide;
         });
 

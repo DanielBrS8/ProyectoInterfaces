@@ -4,6 +4,7 @@ import com.javafx.proyecto.bbdd.PawLinkClient;
 import com.javafx.proyecto.modelo.AdopcionTabla;
 import com.javafx.proyecto.modelo.Mascota;
 import com.javafx.proyecto.modelo.Usuario;
+import com.javafx.proyecto.util.SesionUsuario;
 import com.javafx.proyecto.util.UIUtils;
 import com.javafx.proyecto.util.ValidadorForms;
 
@@ -152,7 +153,7 @@ public class AdopcionCrudController {
                 body.put("fechaFin", seleccionada.getFechaFin() != null ? seleccionada.getFechaFin().toString() : null);
                 body.put("estado", "finalizado");
                 try {
-                    PawLinkClient.actualizarAlquiler(seleccionada.getId(), body);
+                    PawLinkClient.actualizarAlquiler(seleccionada.getId(), body, SesionUsuario.getInstancia().getToken());
                     cargarDatos();
                     onDatosActualizados.run();
                     UIUtils.mostrarInfo("Éxito", "Estado actualizado a finalizado");
@@ -180,7 +181,7 @@ public class AdopcionCrudController {
         listaAdopciones.clear();
 
         try {
-            List<Map<String, Object>> alquileres = PawLinkClient.getAlquileres();
+            List<Map<String, Object>> alquileres = PawLinkClient.getAlquileres(SesionUsuario.getInstancia().getToken());
             for (Map<String, Object> a : alquileres) {
                 int id = ((Number) a.get("idAlquiler")).intValue();
                 String mascota = (String) a.get("nombreMascota");
@@ -280,7 +281,7 @@ public class AdopcionCrudController {
             body.put("fechaFin", dpFin.getValue() != null ? dpFin.getValue().toString() : null);
             body.put("estado", txtEstado.getText());
             try {
-                PawLinkClient.crearAlquiler(body);
+                PawLinkClient.crearAlquiler(body, SesionUsuario.getInstancia().getToken());
             } catch (Exception e) {
                 UIUtils.mostrarInfo("Error API", "No se pudo crear el alquiler:\n" + e.getMessage());
                 return;
@@ -298,7 +299,7 @@ public class AdopcionCrudController {
             bodyMascota.put("foto", m.getFoto());
             bodyMascota.put("notas", m.getNotas());
             try {
-                PawLinkClient.actualizarMascota(m.getId(), bodyMascota);
+                PawLinkClient.actualizarMascota(m.getId(), bodyMascota, SesionUsuario.getInstancia().getToken());
             } catch (Exception e) {
                 UIUtils.mostrarInfo("Aviso", "Alquiler creado, pero no se pudo actualizar la disponibilidad:\n" + e.getMessage());
             }
@@ -376,7 +377,7 @@ public class AdopcionCrudController {
             body.put("fechaFin", dpFin.getValue() != null ? dpFin.getValue().toString() : null);
             body.put("estado", txtEstado.getText());
             try {
-                PawLinkClient.actualizarAlquiler(seleccionada.getId(), body);
+                PawLinkClient.actualizarAlquiler(seleccionada.getId(), body, SesionUsuario.getInstancia().getToken());
                 cargarDatos();
                 onDatosActualizados.run();
             } catch (Exception e) {
@@ -402,7 +403,7 @@ public class AdopcionCrudController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                PawLinkClient.eliminarAlquiler(seleccionada.getId());
+                PawLinkClient.eliminarAlquiler(seleccionada.getId(), SesionUsuario.getInstancia().getToken());
                 cargarDatos();
                 onDatosActualizados.run();
             } catch (Exception e) {
