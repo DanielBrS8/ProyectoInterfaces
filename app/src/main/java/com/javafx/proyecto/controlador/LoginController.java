@@ -96,6 +96,12 @@ public class LoginController {
 
         try {
             Map<String, Object> respuesta = PawLinkClient.login(email, password);
+            String rol = respuesta.get("rol") != null ? respuesta.get("rol").toString() : "";
+            if ("user".equalsIgnoreCase(rol)) {
+                lblError.setText("Acceso denegado. Esta aplicación es solo para personal del centro.");
+                animarError();
+                return;
+            }
             SesionUsuario.getInstancia().iniciarSesion(respuesta);
             animarExito();
         } catch (RuntimeException e) {
@@ -174,6 +180,12 @@ public class LoginController {
                 code = code.substring(0, code.indexOf('&'));
             }
             Map<String, Object> respuesta = PawLinkClient.loginGoogle(code);
+            String rol = respuesta.get("rol") != null ? respuesta.get("rol").toString() : "";
+            if ("user".equalsIgnoreCase(rol)) {
+                lblError.setText("Acceso denegado. Esta aplicación es solo para personal del centro.");
+                animarError();
+                return;
+            }
             SesionUsuario.getInstancia().iniciarSesion(respuesta);
             animarExito();
         } catch (RuntimeException e) {
