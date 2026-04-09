@@ -115,14 +115,19 @@ public class CentroCrudController {
             List<Map<String, Object>> centros = PawLinkClient.getCentros(token);
 
             for (Map<String, Object> c : centros) {
-                Integer id = (Integer) c.get("idCentro");
+                Integer id = c.get("idCentro") instanceof Number ? ((Number) c.get("idCentro")).intValue() : null;
                 String nombre = (String) c.get("nombre");
                 String ciudad = (String) c.get("ciudad");
                 String direccion = (String) c.get("direccion");
                 String telefono = (String) c.get("telefono");
                 String especialidad = (String) c.get("especialidad");
+                String foto = (String) c.get("foto");
+                String horario = (String) c.get("horario");
+                Double latitud = c.get("latitud") instanceof Number ? ((Number) c.get("latitud")).doubleValue() : null;
+                Double longitud = c.get("longitud") instanceof Number ? ((Number) c.get("longitud")).doubleValue() : null;
 
-                listaCentros.add(new CentroVeterinario(id, nombre, ciudad, direccion, telefono, especialidad));
+                listaCentros.add(new CentroVeterinario(id, nombre, ciudad, direccion, telefono, especialidad,
+                        foto, horario, latitud, longitud));
             }
             UIUtils.ocultarErrorConexion(lblErrorConexionCentros);
 
@@ -142,6 +147,7 @@ public class CentroCrudController {
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
             Map<String, Object> body = extraerDatosDialogo(dialog);
+            body.put("foto", null);
             String token = SesionUsuario.getInstancia().getToken();
 
             try {
@@ -167,6 +173,7 @@ public class CentroCrudController {
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
             Map<String, Object> body = extraerDatosDialogo(dialog);
+            body.put("foto", seleccionado.getFoto());
             String token = SesionUsuario.getInstancia().getToken();
 
             try {
@@ -238,11 +245,26 @@ public class CentroCrudController {
         txtEspecialidad.setPromptText("Ej: General, Exóticos...");
         txtEspecialidad.setId("txtEspecialidad");
 
+        TextField txtHorario = new TextField(datos != null && datos.getHorario() != null ? datos.getHorario() : "");
+        txtHorario.setPromptText("Ej: Lunes-Viernes 9:00-18:00");
+        txtHorario.setId("txtHorario");
+
+        TextField txtLatitud = new TextField(datos != null && datos.getLatitud() != null ? datos.getLatitud().toString() : "");
+        txtLatitud.setPromptText("Ej: 40.416952");
+        txtLatitud.setId("txtLatitud");
+
+        TextField txtLongitud = new TextField(datos != null && datos.getLongitud() != null ? datos.getLongitud().toString() : "");
+        txtLongitud.setPromptText("Ej: -3.703534");
+        txtLongitud.setId("txtLongitud");
+
         grid.addRow(0, new Label("Nombre:"), txtNombre);
         grid.addRow(1, new Label("Ciudad:"), txtCiudad);
         grid.addRow(2, new Label("Dirección:"), txtDireccion);
         grid.addRow(3, new Label("Teléfono:"), txtTelefono);
         grid.addRow(4, new Label("Especialidad:"), txtEspecialidad);
+        grid.addRow(5, new Label("Horario:"), txtHorario);
+        grid.addRow(6, new Label("Latitud:"), txtLatitud);
+        grid.addRow(7, new Label("Longitud:"), txtLongitud);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -276,6 +298,15 @@ public class CentroCrudController {
                     case "txtDireccion" -> body.put("direccion", tf.getText().trim());
                     case "txtTelefono" -> body.put("telefono", tf.getText().trim());
                     case "txtEspecialidad" -> body.put("especialidad", tf.getText().trim());
+                    case "txtHorario" -> body.put("horario", tf.getText().trim());
+                    case "txtLatitud" -> {
+                        try { body.put("latitud", Double.parseDouble(tf.getText().trim())); }
+                        catch (NumberFormatException ex) { body.put("latitud", null); }
+                    }
+                    case "txtLongitud" -> {
+                        try { body.put("longitud", Double.parseDouble(tf.getText().trim())); }
+                        catch (NumberFormatException ex) { body.put("longitud", null); }
+                    }
                 }
             }
         }

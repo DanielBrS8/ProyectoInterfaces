@@ -2,6 +2,7 @@ package com.javafx.proyecto.controlador;
 
 import com.javafx.proyecto.bbdd.ConexionBBDD;
 import com.javafx.proyecto.modelo.AdopcionTabla;
+import com.javafx.proyecto.modelo.CentroVeterinario;
 import com.javafx.proyecto.modelo.Mascota;
 import com.javafx.proyecto.modelo.UltimoRegistro;
 import com.javafx.proyecto.modelo.Usuario;
@@ -94,6 +95,19 @@ public class PrincipalController {
     @FXML private ComboBox<String> comboBuscarMascotaEstadoSalud;
     @FXML private Button btnLimpiarMascotas;
 
+    // --- Tabla Centros ---
+    @FXML private TableView<CentroVeterinario> tablaCentros;
+    @FXML private TableColumn<CentroVeterinario, Integer> colCentroId;
+    @FXML private TableColumn<CentroVeterinario, String> colCentroNombre;
+    @FXML private TableColumn<CentroVeterinario, String> colCentroCiudad;
+    @FXML private TableColumn<CentroVeterinario, String> colCentroDireccion;
+    @FXML private TableColumn<CentroVeterinario, String> colCentroTelefono;
+    @FXML private TableColumn<CentroVeterinario, String> colCentroEspecialidad;
+    @FXML private ComboBox<String> comboBuscarCentroNombre;
+    @FXML private ComboBox<String> comboBuscarCentroCiudad;
+    @FXML private Button btnLimpiarCentros;
+    @FXML private Label lblErrorConexionCentros;
+
     // --- Tabla Adopciones ---
     @FXML private TableView<AdopcionTabla> tablaAdopciones;
     @FXML private TableColumn<AdopcionTabla, Integer> colAdopcionId;
@@ -123,18 +137,20 @@ public class PrincipalController {
     private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
     private final ObservableList<Mascota> listaMascotas = FXCollections.observableArrayList();
     private final ObservableList<AdopcionTabla> listaAdopciones = FXCollections.observableArrayList();
+    private final ObservableList<CentroVeterinario> listaCentros = FXCollections.observableArrayList();
 
     // --- Sub-controladores ---
     private UsuarioCrudController usuarioCtrl;
     private MascotaCrudController mascotaCtrl;
     private AdopcionCrudController adopcionCtrl;
     private InformesController informesCtrl;
+    private CentroCrudController centroCtrl;
 
     // --- Estado ---
     private AnchorPane vistaActual;
 
     private enum Seccion {
-        INICIO, USUARIOS, MASCOTAS, ADOPCIONES, INFORMES
+        INICIO, USUARIOS, MASCOTAS, ADOPCIONES, INFORMES, CENTROS
     }
 
     private Seccion seccionActual = Seccion.INICIO;
@@ -177,12 +193,21 @@ public class PrincipalController {
                 btnMascotasIncrustado, btnMascotasVentana, btnMascotasPdf,
                 btnAdopcionesIncrustado, btnAdopcionesVentana, btnAdopcionesPdf);
 
+        centroCtrl = new CentroCrudController(
+                tablaCentros, listaCentros,
+                colCentroId, colCentroNombre, colCentroCiudad, colCentroDireccion,
+                colCentroTelefono, colCentroEspecialidad,
+                comboBuscarCentroNombre, comboBuscarCentroCiudad,
+                btnLimpiarCentros, lblErrorConexionCentros,
+                this::recargarDashboard);
+
         // Configurar navegación
         btnInicio.setOnAction(e -> mostrarVista(vistaInicio, btnInicio, Seccion.INICIO));
         btnUsuarios.setOnAction(e -> mostrarVista(vistaUsuarios, btnUsuarios, Seccion.USUARIOS));
         btnMascotas.setOnAction(e -> mostrarVista(vistaMascotas, btnMascotas, Seccion.MASCOTAS));
         btnAdopciones.setOnAction(e -> mostrarVista(vistaAdopciones, btnAdopciones, Seccion.ADOPCIONES));
         btnInformes.setOnAction(e -> mostrarVista(vistaInformes, btnInformes, Seccion.INFORMES));
+        btnCentros.setOnAction(e -> mostrarVista(vistaCentros, btnCentros, Seccion.CENTROS));
 
         btnNuevo.setOnAction(e -> accionCrud("Nuevo"));
         btnEditar.setOnAction(e -> accionCrud("Editar"));
@@ -193,6 +218,7 @@ public class PrincipalController {
         usuarioCtrl.configurar();
         mascotaCtrl.configurar();
         adopcionCtrl.configurar();
+        centroCtrl.configurar();
         configurarTablaUltimos();
 
         configurarAnimaciones();
@@ -201,6 +227,7 @@ public class PrincipalController {
         usuarioCtrl.cargarDatos();
         mascotaCtrl.cargarDatos();
         adopcionCtrl.cargarDatos();
+        centroCtrl.cargarDatos();
         cargarDatosDashboard();
         mascotaCtrl.rellenarGraficaEspecies();
         cargarUltimosRegistros();
@@ -215,7 +242,7 @@ public class PrincipalController {
         SesionUsuario sesion = SesionUsuario.getInstancia();
 
         if (sesion.isAdmin()) {
-            // Admin solo gestiona usuarios
+            // Admin gestiona usuarios y centros
             btnMascotas.setVisible(false);
             btnMascotas.setManaged(false);
             btnAdopciones.setVisible(false);
@@ -224,9 +251,11 @@ public class PrincipalController {
             btnInformes.setManaged(false);
             mostrarVista(vistaUsuarios, btnUsuarios, Seccion.USUARIOS);
         } else {
-            // Veterinario ve mascotas, adopciones, informes — no usuarios
+            // Veterinario ve mascotas, adopciones, informes — no usuarios ni centros
             btnUsuarios.setVisible(false);
             btnUsuarios.setManaged(false);
+            btnCentros.setVisible(false);
+            btnCentros.setManaged(false);
             mostrarVista(vistaInicio, btnInicio, Seccion.INICIO);
         }
     }
@@ -237,6 +266,7 @@ public class PrincipalController {
         vistaMascotas.setVisible(false);
         vistaAdopciones.setVisible(false);
         vistaInformes.setVisible(false);
+        vistaCentros.setVisible(false);
 
         vista.setVisible(true);
         vista.toFront();
@@ -254,6 +284,7 @@ public class PrincipalController {
             case USUARIOS -> usuarioCtrl.recargarBuscadores();
             case MASCOTAS -> mascotaCtrl.recargarBuscadores();
             case ADOPCIONES -> adopcionCtrl.recargarBuscadores();
+            case CENTROS -> centroCtrl.recargarBuscadores();
             default -> {}
         }
     }
@@ -269,6 +300,10 @@ public class PrincipalController {
         }
         if (tablaAdopciones != null) {
             tablaAdopciones.getSelectionModel().selectedItemProperty()
+                    .addListener((obs, o, n) -> actualizarEstadoBotonesCrud());
+        }
+        if (tablaCentros != null) {
+            tablaCentros.getSelectionModel().selectedItemProperty()
                     .addListener((obs, o, n) -> actualizarEstadoBotonesCrud());
         }
     }
@@ -287,6 +322,7 @@ public class PrincipalController {
         btnMascotas.setStyle(normal);
         btnAdopciones.setStyle(normal);
         btnInformes.setStyle(normal);
+        btnCentros.setStyle(normal);
 
         if (activo != null) {
             activo.setStyle(seleccionado);
@@ -315,6 +351,7 @@ public class PrincipalController {
             case USUARIOS -> haySeleccion = tablaUsuarios != null && tablaUsuarios.getSelectionModel().getSelectedItem() != null;
             case MASCOTAS -> haySeleccion = tablaMascotas != null && tablaMascotas.getSelectionModel().getSelectedItem() != null;
             case ADOPCIONES -> haySeleccion = tablaAdopciones != null && tablaAdopciones.getSelectionModel().getSelectedItem() != null;
+            case CENTROS -> haySeleccion = tablaCentros != null && tablaCentros.getSelectionModel().getSelectedItem() != null;
             case INFORMES -> haySeleccion = false;
             default -> haySeleccion = false;
         }
@@ -350,6 +387,13 @@ public class PrincipalController {
                     case "Nuevo" -> adopcionCtrl.nuevo();
                     case "Editar" -> adopcionCtrl.editar();
                     case "Eliminar" -> adopcionCtrl.eliminar();
+                }
+            }
+            case CENTROS -> {
+                switch (tipo) {
+                    case "Nuevo" -> centroCtrl.nuevo();
+                    case "Editar" -> centroCtrl.editar();
+                    case "Eliminar" -> centroCtrl.eliminar();
                 }
             }
             case INFORMES -> {
@@ -465,6 +509,7 @@ public class PrincipalController {
         UIUtils.configurarHoverBoton(btnMascotas);
         UIUtils.configurarHoverBoton(btnAdopciones);
         UIUtils.configurarHoverBoton(btnInformes);
+        UIUtils.configurarHoverBoton(btnCentros);
         UIUtils.configurarHoverBoton(btnNuevo);
         UIUtils.configurarHoverBoton(btnEditar);
         UIUtils.configurarHoverBoton(btnEliminar);
