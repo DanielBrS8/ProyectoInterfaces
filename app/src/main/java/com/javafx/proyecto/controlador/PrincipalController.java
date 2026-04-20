@@ -13,6 +13,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -20,7 +24,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -44,6 +52,7 @@ public class PrincipalController {
     @FXML private Button btnMascotas;
     @FXML private Button btnAdopciones;
     @FXML private Button btnInformes;
+    @FXML private Button btnChatSoporte;
 
     // --- Botones CRUD ---
     @FXML private Button btnNuevo;
@@ -208,6 +217,7 @@ public class PrincipalController {
         btnAdopciones.setOnAction(e -> mostrarVista(vistaAdopciones, btnAdopciones, Seccion.ADOPCIONES));
         btnInformes.setOnAction(e -> mostrarVista(vistaInformes, btnInformes, Seccion.INFORMES));
         btnCentros.setOnAction(e -> mostrarVista(vistaCentros, btnCentros, Seccion.CENTROS));
+        btnChatSoporte.setOnAction(e -> abrirChatSoporte());
 
         btnNuevo.setOnAction(e -> accionCrud("Nuevo"));
         btnEditar.setOnAction(e -> accionCrud("Editar"));
@@ -510,8 +520,34 @@ public class PrincipalController {
         UIUtils.configurarHoverBoton(btnAdopciones);
         UIUtils.configurarHoverBoton(btnInformes);
         UIUtils.configurarHoverBoton(btnCentros);
+        UIUtils.configurarHoverBoton(btnChatSoporte);
         UIUtils.configurarHoverBoton(btnNuevo);
         UIUtils.configurarHoverBoton(btnEditar);
         UIUtils.configurarHoverBoton(btnEliminar);
+    }
+
+    private void abrirChatSoporte() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ChatVeterinarioView.fxml"));
+            Parent root = loader.load();
+            ChatVeterinarioController chatCtrl = loader.getController();
+
+            Stage chatStage = new Stage();
+            chatStage.setTitle("Chat Soporte - PawLink");
+            chatStage.getIcons().add(
+                    new Image(getClass().getResourceAsStream("/miapp/icons/paw.png")));
+            chatStage.setScene(new Scene(root));
+            chatStage.initOwner(btnChatSoporte.getScene().getWindow());
+            chatStage.initModality(Modality.NONE);
+            chatStage.setResizable(true);
+
+            chatStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
+                    e -> chatCtrl.cerrarConexion());
+
+            chatStage.show();
+        } catch (IOException e) {
+            UIUtils.mostrarInfo("Chat Soporte",
+                    "No se pudo abrir la ventana de chat: " + e.getMessage());
+        }
     }
 }

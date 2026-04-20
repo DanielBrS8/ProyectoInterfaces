@@ -122,6 +122,17 @@
                         </ImageView>
                     </graphic>
                 </Button>
+
+                <Button fx:id="btnChatSoporte" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="Chat _Soporte" mnemonicParsing="true">
+                    <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/paw.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
             </children>
         </VBox>
     </left>
