@@ -15,6 +15,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import org.controlsfx.validation.ValidationSupport;
 
@@ -94,6 +96,25 @@ public class AdopcionCrudController {
         configurarColumnas();
         configurarMenuContextual();
         configurarBuscadores();
+        agregarBotonSolicitudes();
+    }
+
+    private void agregarBotonSolicitudes() {
+        if (btnLimpiarAdopciones == null) return;
+        if (!(btnLimpiarAdopciones.getParent() instanceof HBox hbox)) return;
+
+        Button btn = new Button("Gestionar solicitudes");
+        btn.setGraphic(UIUtils.crearIcono("/miapp/icons/form.png", 16));
+        btn.setStyle("-fx-background-color: #0078d4; -fx-text-fill: white; -fx-font-weight: bold;");
+        btn.setOnAction(e -> {
+            Stage owner = tablaAdopciones.getScene() != null
+                    ? (Stage) tablaAdopciones.getScene().getWindow() : null;
+            SolicitudesAdopcionController.abrir(owner, listaMascotas, listaUsuarios, () -> {
+                cargarDatos();
+                if (onDatosActualizados != null) onDatosActualizados.run();
+            });
+        });
+        hbox.getChildren().add(btn);
     }
 
     private void configurarColumnas() {

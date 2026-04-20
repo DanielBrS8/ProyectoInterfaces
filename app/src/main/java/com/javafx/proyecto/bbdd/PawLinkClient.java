@@ -13,6 +13,7 @@ import java.util.Map;
 public class PawLinkClient {
 
     private static final String BASE_URL = "http://localhost:8080";
+    private static final String PATH_ALQUILERES = "/api/alquileres/";
     private static final HttpClient client = HttpClient.newHttpClient();
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -28,7 +29,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -43,7 +44,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -58,7 +59,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -70,7 +71,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -88,7 +89,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -104,7 +105,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -120,7 +121,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -133,7 +134,7 @@ public class PawLinkClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new RuntimeException("Error HTTP " + response.statusCode() + ": " + response.body());
+            throw new PawLinkHttpException(response.statusCode(), response.body());
         }
         return response;
     }
@@ -189,11 +190,24 @@ public class PawLinkClient {
     }
 
     public static void actualizarAlquiler(int id, Map<String, Object> body, String token) throws Exception {
-        putAuth("/api/alquileres/" + id, body, token);
+        putAuth(PATH_ALQUILERES + id, body, token);
     }
 
     public static void eliminarAlquiler(int id, String token) throws Exception {
-        deleteAuth("/api/alquileres/" + id, token);
+        deleteAuth(PATH_ALQUILERES + id, token);
+    }
+
+    public static void actualizarEstadoAlquiler(int id, String estado, String token) throws Exception {
+        putAuth(PATH_ALQUILERES + id + "/estado", Map.of("estado", estado), token);
+    }
+
+    // -------------------------------------------------------------------------
+    // Historial / Fiabilidad del adoptante
+    // -------------------------------------------------------------------------
+
+    public static Map<String, Object> getHistorialAdopciones(int idUsuario, String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/usuarios/" + idUsuario + "/historial-adopciones", token);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
     }
 
     // -------------------------------------------------------------------------
