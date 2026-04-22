@@ -231,7 +231,7 @@
 
             <AnchorPane fx:id="vistaUsuarios" visible="false">
                 <children>
-                    <Label text="Gestión de Veterinarios"
+                    <Label fx:id="lblTituloUsuarios" text="Gestión de Veterinarios"
                         layoutX="30" layoutY="20"
                         style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
@@ -241,7 +241,7 @@
                                 prefWidth="180" editable="true" />
                             <ComboBox fx:id="comboBuscarUsuarioEmail" promptText="Buscar por email"
                                 prefWidth="180" editable="true" />
-                            <ComboBox fx:id="comboBuscarUsuarioCentro" promptText="Buscar por centro"
+                            <ComboBox fx:id="comboBuscarUsuarioTelefono" promptText="Buscar por teléfono"
                                 prefWidth="180" editable="true" />
                             <Button fx:id="btnLimpiarUsuarios" text="_Buscar" mnemonicParsing="true" />
                         </children>
@@ -256,11 +256,13 @@
                         layoutX="30" layoutY="140"
                         prefHeight="400" prefWidth="740">
                         <columns>
-                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
-                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="180" />
-                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="200" />
-                            <TableColumn fx:id="colUsuarioCentro" text="Centro" prefWidth="200" />
-                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="80" />
+                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="50" />
+                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="140" />
+                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="170" />
+                            <TableColumn fx:id="colUsuarioTelefono" text="Teléfono" prefWidth="100" />
+                            <TableColumn fx:id="colUsuarioDireccion" text="Dirección" prefWidth="160" />
+                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="60" />
+                            <TableColumn fx:id="colUsuarioFechaRegistro" text="Fecha Registro" prefWidth="130" />
                         </columns>
                     </TableView>
                 </children>

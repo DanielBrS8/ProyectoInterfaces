@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -13,7 +13,7 @@
 <VBox xmlns="http://javafx.com/javafx/25"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.javafx.proyecto.controlador.ChatVeterinarioController"
-      prefHeight="550.0" prefWidth="600.0"
+      prefHeight="600.0" prefWidth="900.0"
       stylesheets="@styles.css"
       style="-fx-background-color: #F8F9FA;">
 
@@ -25,27 +25,44 @@
             </image>
         </ImageView>
         <VBox>
-            <Label text="Chat Soporte"
+            <Label text="Chat PawLink"
                    style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
             <Label fx:id="lblEstado" text="Conectando..."
                    style="-fx-font-size: 12px; -fx-text-fill: #E3F2FD;" />
         </VBox>
     </HBox>
 
-    <ListView fx:id="listaMensajes"
-              VBox.vgrow="ALWAYS"
-              style="-fx-background-color: white; -fx-border-color: #CCCCCC; -fx-border-width: 0 0 1 0;">
-        <VBox.margin>
-            <Insets top="0" right="0" bottom="0" left="0" />
-        </VBox.margin>
-    </ListView>
+    <SplitPane dividerPositions="0.3" VBox.vgrow="ALWAYS">
 
-    <HBox spacing="10.0" alignment="CENTER"
-          style="-fx-background-color: white; -fx-padding: 12 16 12 16; -fx-border-color: #CCCCCC; -fx-border-width: 1 0 0 0;">
-        <TextField fx:id="txtMensaje" promptText="Escribe un mensaje..."
-                   HBox.hgrow="ALWAYS"
-                   style="-fx-font-size: 13px;" />
-        <Button fx:id="btnEnviar" text="Enviar"
-                style="-fx-background-color: #276FBF; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 22; -fx-background-radius: 5; -fx-cursor: hand;" />
-    </HBox>
+        <VBox style="-fx-background-color: white;">
+            <HBox alignment="CENTER_LEFT"
+                  style="-fx-padding: 10 14 6 14;">
+                <Label text="Conversaciones"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;"
+                       HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                <Button fx:id="btnNuevaConversacion" text="+ Nueva"
+                        style="-fx-background-color: #276FBF; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 10; -fx-background-radius: 4; -fx-cursor: hand; -fx-font-size: 11px;" />
+            </HBox>
+            <ListView fx:id="listaConversaciones" VBox.vgrow="ALWAYS"
+                      style="-fx-background-insets: 0; -fx-border-width: 0;" />
+        </VBox>
+
+        <VBox style="-fx-background-color: #F8F9FA;">
+            <Label fx:id="lblCabeceraChat" text="Selecciona una conversación"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 12 14 8 14; -fx-text-fill: #333; -fx-background-color: white; -fx-border-color: #E0E0E0; -fx-border-width: 0 0 1 0;" />
+
+            <ListView fx:id="listaMensajes" VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: #F8F9FA; -fx-border-width: 0;" />
+
+            <HBox spacing="10.0" alignment="CENTER"
+                  style="-fx-background-color: white; -fx-padding: 12 16 12 16; -fx-border-color: #CCCCCC; -fx-border-width: 1 0 0 0;">
+                <TextField fx:id="txtMensaje" promptText="Escribe un mensaje..."
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 13px;" />
+                <Button fx:id="btnEnviar" text="Enviar"
+                        style="-fx-background-color: #276FBF; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 22; -fx-background-radius: 5; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+
+    </SplitPane>
 </VBox>

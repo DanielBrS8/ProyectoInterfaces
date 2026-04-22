@@ -252,4 +252,34 @@ public class PawLinkClient {
     public static void eliminarCentro(int id, String token) throws Exception {
         deleteAuth("/api/centros/" + id, token);
     }
+
+    // -------------------------------------------------------------------------
+    // Chat — Conversaciones y Mensajes
+    // -------------------------------------------------------------------------
+
+    public static List<Map<String, Object>> getConversaciones(int idUsuario, String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/chat/usuario/" + idUsuario + "/conversaciones", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static List<Map<String, Object>> getMensajes(int idConversacion, String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/chat/conversacion/" + idConversacion + "/mensajes", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static Map<String, Object> enviarMensaje(int idConversacion, int idEmisor, String contenido, String token) throws Exception {
+        Map<String, Object> body = Map.of("idEmisor", idEmisor, "contenido", contenido);
+        HttpResponse<String> response = postAuth("/api/chat/conversacion/" + idConversacion + "/mensaje", body, token);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
+
+    public static List<Map<String, Object>> getContactosChat(int idUsuario, String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/chat/usuario/" + idUsuario + "/contactos", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static Map<String, Object> crearConversacion(Map<String, Object> body, String token) throws Exception {
+        HttpResponse<String> response = postAuth("/api/chat/conversacion", body, token);
+        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
 }

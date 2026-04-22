@@ -26,12 +26,14 @@ public class UsuarioCrudController {
     private final TableColumn<Usuario, Integer> colUsuarioId;
     private final TableColumn<Usuario, String> colUsuarioNombre;
     private final TableColumn<Usuario, String> colUsuarioEmail;
-    private final TableColumn<Usuario, String> colUsuarioCentro;
+    private final TableColumn<Usuario, String> colUsuarioTelefono;
+    private final TableColumn<Usuario, String> colUsuarioDireccion;
     private final TableColumn<Usuario, Boolean> colUsuarioActivo;
+    private final TableColumn<Usuario, String> colUsuarioFechaRegistro;
 
     private final ComboBox<String> comboBuscarUsuarioNombre;
     private final ComboBox<String> comboBuscarUsuarioEmail;
-    private final ComboBox<String> comboBuscarUsuarioCentro;
+    private final ComboBox<String> comboBuscarUsuarioTelefono;
     private final Button btnLimpiarUsuarios;
 
     private final Label lblErrorConexionUsuarios;
@@ -47,11 +49,13 @@ public class UsuarioCrudController {
             TableColumn<Usuario, Integer> colUsuarioId,
             TableColumn<Usuario, String> colUsuarioNombre,
             TableColumn<Usuario, String> colUsuarioEmail,
-            TableColumn<Usuario, String> colUsuarioCentro,
+            TableColumn<Usuario, String> colUsuarioTelefono,
+            TableColumn<Usuario, String> colUsuarioDireccion,
             TableColumn<Usuario, Boolean> colUsuarioActivo,
+            TableColumn<Usuario, String> colUsuarioFechaRegistro,
             ComboBox<String> comboBuscarUsuarioNombre,
             ComboBox<String> comboBuscarUsuarioEmail,
-            ComboBox<String> comboBuscarUsuarioCentro,
+            ComboBox<String> comboBuscarUsuarioTelefono,
             Button btnLimpiarUsuarios,
             Label lblErrorConexionUsuarios,
             Runnable onDatosActualizados) {
@@ -61,11 +65,13 @@ public class UsuarioCrudController {
         this.colUsuarioId = colUsuarioId;
         this.colUsuarioNombre = colUsuarioNombre;
         this.colUsuarioEmail = colUsuarioEmail;
-        this.colUsuarioCentro = colUsuarioCentro;
+        this.colUsuarioTelefono = colUsuarioTelefono;
+        this.colUsuarioDireccion = colUsuarioDireccion;
         this.colUsuarioActivo = colUsuarioActivo;
+        this.colUsuarioFechaRegistro = colUsuarioFechaRegistro;
         this.comboBuscarUsuarioNombre = comboBuscarUsuarioNombre;
         this.comboBuscarUsuarioEmail = comboBuscarUsuarioEmail;
-        this.comboBuscarUsuarioCentro = comboBuscarUsuarioCentro;
+        this.comboBuscarUsuarioTelefono = comboBuscarUsuarioTelefono;
         this.btnLimpiarUsuarios = btnLimpiarUsuarios;
         this.lblErrorConexionUsuarios = lblErrorConexionUsuarios;
         this.onDatosActualizados = onDatosActualizados;
@@ -81,8 +87,15 @@ public class UsuarioCrudController {
         colUsuarioId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colUsuarioNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colUsuarioEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        colUsuarioCentro.setCellValueFactory(new PropertyValueFactory<>("nombreCentro"));
+        colUsuarioTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        colUsuarioDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
         colUsuarioActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
+        colUsuarioFechaRegistro.setCellValueFactory(cd -> {
+            String raw = cd.getValue().getFechaRegistro();
+            String formateada = raw == null ? "" : raw.replace("T", " ");
+            if (formateada.length() >= 16) formateada = formateada.substring(0, 16);
+            return new javafx.beans.property.SimpleStringProperty(formateada);
+        });
     }
 
     private void configurarMenuContextual() {
@@ -96,12 +109,7 @@ public class UsuarioCrudController {
         itemVerDetalles.setOnAction(e -> {
             Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (seleccionado != null) {
-                UIUtils.mostrarInfo("Detalles del Veterinario",
-                        "ID: " + seleccionado.getId() + "\n" +
-                                "Nombre: " + seleccionado.getNombre() + "\n" +
-                                "Email: " + seleccionado.getEmail() + "\n" +
-                                "Centro: " + (seleccionado.getNombreCentro() != null ? seleccionado.getNombreCentro() : "Sin asignar") + "\n" +
-                                "Activo: " + (Boolean.TRUE.equals(seleccionado.getActivo()) ? "Sí" : "No"));
+                mostrarDetalles(seleccionado);
             }
         });
 
@@ -112,20 +120,50 @@ public class UsuarioCrudController {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
                 if (sel != null) {
-                    UIUtils.mostrarInfo("Detalles del Veterinario",
-                            "ID: " + sel.getId() + "\n" +
-                                    "Nombre: " + sel.getNombre() + "\n" +
-                                    "Email: " + sel.getEmail() + "\n" +
-                                    "Centro: " + (sel.getNombreCentro() != null ? sel.getNombreCentro() : "Sin asignar") + "\n" +
-                                    "Activo: " + (Boolean.TRUE.equals(sel.getActivo()) ? "Sí" : "No"));
+                    mostrarDetalles(sel);
                 }
             }
         });
     }
 
+    private void mostrarDetalles(Usuario u) {
+        String titulo = "Detalles del " + capitalizar(etiquetaEntidad());
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(u.getId()).append("\n");
+        sb.append("Nombre: ").append(u.getNombre()).append("\n");
+        sb.append("Email: ").append(u.getEmail()).append("\n");
+        sb.append("Teléfono: ").append(u.getTelefono() != null ? u.getTelefono() : "—").append("\n");
+        sb.append("Dirección: ").append(u.getDireccion() != null ? u.getDireccion() : "—").append("\n");
+        if (SesionUsuario.getInstancia().isAdmin()) {
+            sb.append("Centro: ").append(u.getNombreCentro() != null ? u.getNombreCentro() : "Sin asignar").append("\n");
+        }
+        if (u.getMonedas() != null) {
+            sb.append("Monedas: ").append(u.getMonedas()).append("\n");
+        }
+        if (u.getFechaRegistro() != null) {
+            sb.append("Fecha registro: ").append(u.getFechaRegistro().replace("T", " ")).append("\n");
+        }
+        sb.append("Activo: ").append(Boolean.TRUE.equals(u.getActivo()) ? "Sí" : "No");
+        UIUtils.mostrarInfo(titulo, sb.toString());
+    }
+
+    private String capitalizar(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    private String rolGestionado() {
+        return SesionUsuario.getInstancia().isAdmin() ? "veterinario" : "user";
+    }
+
+    private String etiquetaEntidad() {
+        return SesionUsuario.getInstancia().isAdmin() ? "veterinario" : "usuario";
+    }
+
     public void cargarDatos() {
         listaUsuarios.clear();
         String token = SesionUsuario.getInstancia().getToken();
+        String rolFiltro = rolGestionado();
         System.out.println("[DEBUG] Token para getUsuarios: " + (token != null ? token.substring(0, Math.min(20, token.length())) + "..." : "NULL"));
 
         try {
@@ -133,7 +171,7 @@ public class UsuarioCrudController {
 
             for (Map<String, Object> u : usuarios) {
                 String rol = (String) u.get("rol");
-                if (!"veterinario".equals(rol)) continue;
+                if (!rolFiltro.equals(rol)) continue;
 
                 Integer id = (Integer) u.get("id");
                 String nombre = (String) u.get("nombre");
@@ -142,7 +180,13 @@ public class UsuarioCrudController {
                 Boolean activo = activoRaw instanceof Boolean ? (Boolean) activoRaw : activoRaw != null && ((Number) activoRaw).intValue() == 1;
                 String nombreCentro = (String) u.get("nombreCentro");
 
-                listaUsuarios.add(new Usuario(id, nombre, email, activo, rol, nombreCentro));
+                Usuario usuario = new Usuario(id, nombre, email, activo, rol, nombreCentro);
+                usuario.setTelefono((String) u.get("telefono"));
+                usuario.setDireccion((String) u.get("direccion"));
+                Object monedasRaw = u.get("monedas");
+                if (monedasRaw instanceof Number) usuario.setMonedas(((Number) monedasRaw).intValue());
+                usuario.setFechaRegistro((String) u.get("fechaRegistro"));
+                listaUsuarios.add(usuario);
             }
             UIUtils.ocultarErrorConexion(lblErrorConexionUsuarios);
 
@@ -175,16 +219,21 @@ public class UsuarioCrudController {
     }
 
     public void nuevo() {
-        cargarCentros();
+        boolean esAdmin = SesionUsuario.getInstancia().isAdmin();
+        String etiqueta = etiquetaEntidad();
+        String rol = rolGestionado();
 
-        if (mapaCentros.isEmpty()) {
-            UIUtils.mostrarInfo("Sin centros", "No hay centros veterinarios registrados. Crea uno primero.");
-            return;
+        if (esAdmin) {
+            cargarCentros();
+            if (mapaCentros.isEmpty()) {
+                UIUtils.mostrarInfo("Sin centros", "No hay centros veterinarios registrados. Crea uno primero.");
+                return;
+            }
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nuevo veterinario");
-        dialog.setHeaderText("Introduce los datos del nuevo veterinario");
+        dialog.setTitle("Nuevo " + etiqueta);
+        dialog.setHeaderText("Introduce los datos del nuevo " + etiqueta);
 
         ButtonType btnGuardar = new ButtonType("_Guardar", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancelar = new ButtonType("_Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -196,20 +245,24 @@ public class UsuarioCrudController {
         txtNombre.setPromptText("Ej: Juan Pérez");
 
         TextField txtEmail = new TextField();
-        txtEmail.setPromptText("veterinario@ejemplo.com");
+        txtEmail.setPromptText(etiqueta + "@ejemplo.com");
 
         PasswordField txtPassword = new PasswordField();
         txtPassword.setPromptText("Contraseña");
 
         ComboBox<String> comboCentro = new ComboBox<>();
-        comboCentro.getItems().addAll(mapaCentros.keySet());
-        comboCentro.setPromptText("Selecciona un centro");
-        comboCentro.setPrefWidth(220);
+        if (esAdmin) {
+            comboCentro.getItems().addAll(mapaCentros.keySet());
+            comboCentro.setPromptText("Selecciona un centro");
+            comboCentro.setPrefWidth(220);
+        }
 
         grid.addRow(0, new Label("Nombre:"), txtNombre);
         grid.addRow(1, new Label("Email:"), txtEmail);
         grid.addRow(2, new Label("Contraseña:"), txtPassword);
-        grid.addRow(3, new Label("Centro:"), comboCentro);
+        if (esAdmin) {
+            grid.addRow(3, new Label("Centro:"), comboCentro);
+        }
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -221,41 +274,44 @@ public class UsuarioCrudController {
             boolean valido = !txtNombre.getText().trim().isEmpty()
                     && !txtEmail.getText().trim().isEmpty()
                     && !txtPassword.getText().trim().isEmpty()
-                    && comboCentro.getValue() != null;
+                    && (!esAdmin || comboCentro.getValue() != null);
             dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!valido);
         };
 
         txtNombre.textProperty().addListener((obs, o, n) -> validar.run());
         txtEmail.textProperty().addListener((obs, o, n) -> validar.run());
         txtPassword.textProperty().addListener((obs, o, n) -> validar.run());
-        comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
+        if (esAdmin) {
+            comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
+        }
 
         javafx.application.Platform.runLater(txtNombre::requestFocus);
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
             String token = SesionUsuario.getInstancia().getToken();
-            Integer idCentro = mapaCentros.get(comboCentro.getValue());
 
             Map<String, Object> body = new HashMap<>();
             body.put("nombre", txtNombre.getText().trim());
             body.put("email", txtEmail.getText().trim());
             body.put("password", txtPassword.getText());
-            body.put("rol", "veterinario");
-            body.put("idCentro", idCentro);
+            body.put("rol", rol);
+            if (esAdmin) {
+                body.put("idCentro", mapaCentros.get(comboCentro.getValue()));
+            }
 
             try {
                 PawLinkClient.crearUsuario(body, token);
                 cargarDatos();
                 onDatosActualizados.run();
-                UIUtils.mostrarInfo("Veterinario creado",
-                        "Se ha creado el veterinario " + txtNombre.getText().trim() + " correctamente.");
+                UIUtils.mostrarInfo(capitalizar(etiqueta) + " creado",
+                        "Se ha creado el " + etiqueta + " " + txtNombre.getText().trim() + " correctamente.");
             } catch (RuntimeException e) {
                 String msg = e.getMessage();
                 if (msg != null && msg.contains("409")) {
                     UIUtils.mostrarInfo("Error", "Ya existe un usuario con ese email.");
                 } else {
-                    UIUtils.mostrarInfo("Error", "No se pudo crear el veterinario:\n" + msg);
+                    UIUtils.mostrarInfo("Error", "No se pudo crear el " + etiqueta + ":\n" + msg);
                 }
             } catch (Exception e) {
                 UIUtils.mostrarInfo("Error", "Error de conexión con el servidor.");
@@ -264,18 +320,24 @@ public class UsuarioCrudController {
     }
 
     public void editar() {
+        boolean esAdmin = SesionUsuario.getInstancia().isAdmin();
+        String etiqueta = etiquetaEntidad();
+        String rol = rolGestionado();
+
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            UIUtils.mostrarInfo("Editar veterinario", "Selecciona primero un veterinario de la tabla.");
+            UIUtils.mostrarInfo("Editar " + etiqueta, "Selecciona primero un " + etiqueta + " de la tabla.");
             return;
         }
 
-        cargarCentros();
+        if (esAdmin) {
+            cargarCentros();
+        }
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Editar veterinario");
-        dialog.setHeaderText("Edita los datos del veterinario");
+        dialog.setTitle("Editar " + etiqueta);
+        dialog.setHeaderText("Edita los datos del " + etiqueta);
 
         ButtonType btnGuardar = new ButtonType("_Guardar", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancelar = new ButtonType("_Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -290,16 +352,20 @@ public class UsuarioCrudController {
         txtPassword.setPromptText("Dejar vacío para no cambiar");
 
         ComboBox<String> comboCentro = new ComboBox<>();
-        comboCentro.getItems().addAll(mapaCentros.keySet());
-        comboCentro.setPrefWidth(220);
-        if (seleccionado.getNombreCentro() != null) {
-            comboCentro.setValue(seleccionado.getNombreCentro());
+        if (esAdmin) {
+            comboCentro.getItems().addAll(mapaCentros.keySet());
+            comboCentro.setPrefWidth(220);
+            if (seleccionado.getNombreCentro() != null) {
+                comboCentro.setValue(seleccionado.getNombreCentro());
+            }
         }
 
         grid.addRow(0, new Label("Nombre:"), txtNombre);
         grid.addRow(1, new Label("Email:"), txtEmail);
         grid.addRow(2, new Label("Contraseña:"), txtPassword);
-        grid.addRow(3, new Label("Centro:"), comboCentro);
+        if (esAdmin) {
+            grid.addRow(3, new Label("Centro:"), comboCentro);
+        }
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(500);
@@ -308,24 +374,27 @@ public class UsuarioCrudController {
         Runnable validar = () -> {
             boolean valido = !txtNombre.getText().trim().isEmpty()
                     && !txtEmail.getText().trim().isEmpty()
-                    && comboCentro.getValue() != null;
+                    && (!esAdmin || comboCentro.getValue() != null);
             dialog.getDialogPane().lookupButton(btnGuardar).setDisable(!valido);
         };
 
         txtNombre.textProperty().addListener((obs, o, n) -> validar.run());
         txtEmail.textProperty().addListener((obs, o, n) -> validar.run());
-        comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
+        if (esAdmin) {
+            comboCentro.valueProperty().addListener((obs, o, n) -> validar.run());
+        }
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == btnGuardar) {
             String token = SesionUsuario.getInstancia().getToken();
-            Integer idCentro = mapaCentros.get(comboCentro.getValue());
 
             Map<String, Object> body = new HashMap<>();
             body.put("nombre", txtNombre.getText().trim());
             body.put("email", txtEmail.getText().trim());
-            body.put("rol", "veterinario");
-            body.put("idCentro", idCentro);
+            body.put("rol", rol);
+            if (esAdmin) {
+                body.put("idCentro", mapaCentros.get(comboCentro.getValue()));
+            }
             if (!txtPassword.getText().isEmpty()) {
                 body.put("password", txtPassword.getText());
             }
@@ -339,7 +408,7 @@ public class UsuarioCrudController {
                 if (msg != null && msg.contains("409")) {
                     UIUtils.mostrarInfo("Error", "Ya existe un usuario con ese email.");
                 } else {
-                    UIUtils.mostrarInfo("Error", "No se pudo actualizar el veterinario:\n" + msg);
+                    UIUtils.mostrarInfo("Error", "No se pudo actualizar el " + etiqueta + ":\n" + msg);
                 }
             } catch (Exception e) {
                 UIUtils.mostrarInfo("Error", "Error de conexión con el servidor.");
@@ -348,17 +417,18 @@ public class UsuarioCrudController {
     }
 
     public void eliminar() {
+        String etiqueta = etiquetaEntidad();
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            UIUtils.mostrarInfo("Eliminar veterinario", "Selecciona primero un veterinario de la tabla.");
+            UIUtils.mostrarInfo("Eliminar " + etiqueta, "Selecciona primero un " + etiqueta + " de la tabla.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar veterinario");
+        confirm.setTitle("Eliminar " + etiqueta);
         confirm.setHeaderText(null);
-        confirm.setContentText("¿Seguro que quieres eliminar al veterinario " + seleccionado.getNombre() + "?");
+        confirm.setContentText("¿Seguro que quieres eliminar al " + etiqueta + " " + seleccionado.getNombre() + "?");
         UIUtils.añadirIconoADialogo(confirm);
 
         Optional<ButtonType> result = confirm.showAndWait();
@@ -370,7 +440,7 @@ public class UsuarioCrudController {
                 cargarDatos();
                 onDatosActualizados.run();
             } catch (Exception e) {
-                UIUtils.mostrarInfo("Error", "No se pudo eliminar el veterinario:\n" + e.getMessage());
+                UIUtils.mostrarInfo("Error", "No se pudo eliminar el " + etiqueta + ":\n" + e.getMessage());
             }
         }
     }
@@ -388,12 +458,12 @@ public class UsuarioCrudController {
             UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioEmail, emails,
                 () -> listaUsuarios.stream().map(Usuario::getEmail).distinct().toList());
         }
-        if (comboBuscarUsuarioCentro != null) {
-            ObservableList<String> centros = FXCollections.observableArrayList();
-            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioCentro, centros,
+        if (comboBuscarUsuarioTelefono != null) {
+            ObservableList<String> telefonos = FXCollections.observableArrayList();
+            UIUtils.configurarBuscadorConAutocompletado(comboBuscarUsuarioTelefono, telefonos,
                 () -> listaUsuarios.stream()
-                        .map(Usuario::getNombreCentro)
-                        .filter(c -> c != null)
+                        .map(Usuario::getTelefono)
+                        .filter(t -> t != null)
                         .distinct().toList());
         }
         if (btnLimpiarUsuarios != null) {
@@ -404,8 +474,8 @@ public class UsuarioCrudController {
     public void recargarBuscadores() {
         recargarCombo(comboBuscarUsuarioNombre, () -> listaUsuarios.stream().map(Usuario::getNombre).distinct().toList());
         recargarCombo(comboBuscarUsuarioEmail, () -> listaUsuarios.stream().map(Usuario::getEmail).distinct().toList());
-        recargarCombo(comboBuscarUsuarioCentro, () -> listaUsuarios.stream()
-                .map(Usuario::getNombreCentro).filter(c -> c != null).distinct().toList());
+        recargarCombo(comboBuscarUsuarioTelefono, () -> listaUsuarios.stream()
+                .map(Usuario::getTelefono).filter(t -> t != null).distinct().toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -421,14 +491,14 @@ public class UsuarioCrudController {
     private void buscar() {
         String nombre = getValor(comboBuscarUsuarioNombre);
         String email = getValor(comboBuscarUsuarioEmail);
-        String centro = getValor(comboBuscarUsuarioCentro);
+        String telefono = getValor(comboBuscarUsuarioTelefono);
 
         ObservableList<Usuario> filtrados = listaUsuarios.filtered(usuario -> {
             boolean coincide = true;
             if (!nombre.isEmpty()) coincide = usuario.getNombre().toLowerCase().contains(nombre);
             if (!email.isEmpty()) coincide = coincide && usuario.getEmail().toLowerCase().contains(email);
-            if (!centro.isEmpty()) coincide = coincide && usuario.getNombreCentro() != null
-                    && usuario.getNombreCentro().toLowerCase().contains(centro);
+            if (!telefono.isEmpty()) coincide = coincide && usuario.getTelefono() != null
+                    && usuario.getTelefono().toLowerCase().contains(telefono);
             return coincide;
         });
 

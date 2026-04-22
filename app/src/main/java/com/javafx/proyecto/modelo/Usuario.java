@@ -10,6 +10,8 @@ public class Usuario {
     private Boolean activo;
     private String rol;
     private String nombreCentro;
+    private Integer monedas;
+    private String fechaRegistro;
 
     public Usuario(Integer id, String nombre, String email,
             String telefono, String direccion, Boolean activo) {
@@ -72,6 +74,30 @@ public class Usuario {
 
     public String getNombreCentro() {
         return nombreCentro;
+    }
+
+    public Integer getMonedas() {
+        return monedas;
+    }
+
+    public void setMonedas(Integer monedas) {
+        this.monedas = monedas;
+    }
+
+    public String getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(String fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     @Override

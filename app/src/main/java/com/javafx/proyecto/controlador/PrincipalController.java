@@ -77,15 +77,18 @@ public class PrincipalController {
     @FXML private NumberAxis ejeYEspecies;
 
     // --- Tabla Usuarios (Veterinarios) ---
+    @FXML private Label lblTituloUsuarios;
     @FXML private TableView<Usuario> tablaUsuarios;
     @FXML private TableColumn<Usuario, Integer> colUsuarioId;
     @FXML private TableColumn<Usuario, String> colUsuarioNombre;
     @FXML private TableColumn<Usuario, String> colUsuarioEmail;
-    @FXML private TableColumn<Usuario, String> colUsuarioCentro;
+    @FXML private TableColumn<Usuario, String> colUsuarioTelefono;
+    @FXML private TableColumn<Usuario, String> colUsuarioDireccion;
     @FXML private TableColumn<Usuario, Boolean> colUsuarioActivo;
+    @FXML private TableColumn<Usuario, String> colUsuarioFechaRegistro;
     @FXML private ComboBox<String> comboBuscarUsuarioNombre;
     @FXML private ComboBox<String> comboBuscarUsuarioEmail;
-    @FXML private ComboBox<String> comboBuscarUsuarioCentro;
+    @FXML private ComboBox<String> comboBuscarUsuarioTelefono;
     @FXML private Button btnLimpiarUsuarios;
 
     // --- Tabla Mascotas ---
@@ -170,9 +173,10 @@ public class PrincipalController {
         usuarioCtrl = new UsuarioCrudController(
                 tablaUsuarios, listaUsuarios,
                 colUsuarioId, colUsuarioNombre, colUsuarioEmail,
-                colUsuarioCentro, colUsuarioActivo,
+                colUsuarioTelefono, colUsuarioDireccion,
+                colUsuarioActivo, colUsuarioFechaRegistro,
                 comboBuscarUsuarioNombre, comboBuscarUsuarioEmail,
-                comboBuscarUsuarioCentro,
+                comboBuscarUsuarioTelefono,
                 btnLimpiarUsuarios, lblErrorConexionUsuarios,
                 this::recargarDashboard);
 
@@ -252,20 +256,20 @@ public class PrincipalController {
         SesionUsuario sesion = SesionUsuario.getInstancia();
 
         if (sesion.isAdmin()) {
-            // Admin gestiona usuarios y centros
+            // Admin gestiona veterinarios y centros
             btnMascotas.setVisible(false);
             btnMascotas.setManaged(false);
             btnAdopciones.setVisible(false);
             btnAdopciones.setManaged(false);
             btnInformes.setVisible(false);
             btnInformes.setManaged(false);
+            if (lblTituloUsuarios != null) lblTituloUsuarios.setText("Gestión de Veterinarios");
             mostrarVista(vistaUsuarios, btnUsuarios, Seccion.USUARIOS);
         } else {
-            // Veterinario ve mascotas, adopciones, informes — no usuarios ni centros
-            btnUsuarios.setVisible(false);
-            btnUsuarios.setManaged(false);
+            // Veterinario ve mascotas, adopciones, informes y usuarios normales — no centros
             btnCentros.setVisible(false);
             btnCentros.setManaged(false);
+            if (lblTituloUsuarios != null) lblTituloUsuarios.setText("Gestión de Usuarios");
             mostrarVista(vistaInicio, btnInicio, Seccion.INICIO);
         }
     }
@@ -526,13 +530,21 @@ public class PrincipalController {
         UIUtils.configurarHoverBoton(btnEliminar);
     }
 
+    private Stage chatStage;
+
     private void abrirChatSoporte() {
+        if (chatStage != null && chatStage.isShowing()) {
+            chatStage.toFront();
+            chatStage.requestFocus();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ChatVeterinarioView.fxml"));
             Parent root = loader.load();
             ChatVeterinarioController chatCtrl = loader.getController();
 
-            Stage chatStage = new Stage();
+            chatStage = new Stage();
             chatStage.setTitle("Chat Soporte - PawLink");
             chatStage.getIcons().add(
                     new Image(getClass().getResourceAsStream("/miapp/icons/paw.png")));
@@ -541,8 +553,10 @@ public class PrincipalController {
             chatStage.initModality(Modality.NONE);
             chatStage.setResizable(true);
 
-            chatStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
-                    e -> chatCtrl.cerrarConexion());
+            chatStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
+                chatCtrl.cerrarConexion();
+                chatStage = null;
+            });
 
             chatStage.show();
         } catch (IOException e) {
