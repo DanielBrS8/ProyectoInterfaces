@@ -115,10 +115,13 @@ public class ChatVeterinarioController {
             return;
         }
 
+        Integer miCentro = sesion.getIdCentro();
+
         new Thread(() -> {
             try {
                 List<Map<String, Object>> contactos = PawLinkClient.getContactosChat(miId, token);
-                Platform.runLater(() -> mostrarSelectorUsuario(contactos));
+                List<Map<String, Object>> filtrados = filtrarPorCentro(contactos, miCentro);
+                Platform.runLater(() -> mostrarSelectorUsuario(filtrados, miCentro));
             } catch (Exception e) {
                 Platform.runLater(() -> UIUtils.mostrarInfo("Chat",
                         "No se pudieron cargar los usuarios:\n" + e.getMessage()));
@@ -126,9 +129,25 @@ public class ChatVeterinarioController {
         }, "ChatContactosThread").start();
     }
 
-    private void mostrarSelectorUsuario(List<Map<String, Object>> contactos) {
+    private List<Map<String, Object>> filtrarPorCentro(List<Map<String, Object>> contactos, Integer miCentro) {
+        if (contactos == null) return java.util.Collections.emptyList();
+        if (miCentro == null) return contactos;
+        List<Map<String, Object>> resultado = new java.util.ArrayList<>();
+        for (Map<String, Object> c : contactos) {
+            Integer idCentroContacto = toInt(c.get("idCentro"));
+            if (miCentro.equals(idCentroContacto)) {
+                resultado.add(c);
+            }
+        }
+        return resultado;
+    }
+
+    private void mostrarSelectorUsuario(List<Map<String, Object>> contactos, Integer miCentro) {
         if (contactos == null || contactos.isEmpty()) {
-            UIUtils.mostrarInfo("Chat", "No hay usuarios disponibles para iniciar una conversación.");
+            String mensaje = miCentro == null
+                    ? "No hay usuarios disponibles para iniciar una conversación."
+                    : "No hay usuarios de tu centro disponibles para iniciar una conversación.";
+            UIUtils.mostrarInfo("Chat", mensaje);
             return;
         }
 
