@@ -139,12 +139,12 @@ public class MascotaCrudController {
             if (seleccionada != null) {
                 UIUtils.mostrarInfo("Detalles de la Mascota",
                         "ID: " + seleccionada.getId() + "\n" +
-                                "Nombre: " + seleccionada.getNombre() + "\n" +
-                                "Especie: " + seleccionada.getEspecie() + "\n" +
-                                "Raza: " + seleccionada.getRaza() + "\n" +
-                                "Peso: " + seleccionada.getPeso() + " kg\n" +
-                                "Estado: " + seleccionada.getEstadoSalud() + "\n" +
-                                "Disponible: " + (seleccionada.getDisponible() ? "Sí" : "No"));
+                        "Nombre: " + seleccionada.getNombre() + "\n" +
+                        "Especie: " + seleccionada.getEspecie() + "\n" +
+                        "Raza: " + seleccionada.getRaza() + "\n" +
+                        "Peso: " + seleccionada.getPeso() + " kg\n" +
+                        "Estado: " + seleccionada.getEstadoSalud() + "\n" +
+                        "Disponible: " + (seleccionada.getDisponible() ? "Sí" : "No"));
             }
         });
 
@@ -176,8 +176,13 @@ public class MascotaCrudController {
             }
         });
 
+        MenuItem itemVacunacion = new MenuItem("_Vacunación");
+        itemVacunacion.setMnemonicParsing(true);
+        itemVacunacion.setGraphic(UIUtils.crearIcono("/miapp/icons/form.png", 16));
+        itemVacunacion.setOnAction(e -> gestionarVacunas());
+
         menuContextual.getItems().addAll(itemEditar, itemEliminar, new SeparatorMenuItem(),
-                itemVerDetalles, itemCambiarDisponibilidad);
+                itemVerDetalles, itemVacunacion, itemCambiarDisponibilidad);
 
         tablaMascotas.setContextMenu(menuContextual);
 
@@ -483,6 +488,30 @@ public class MascotaCrudController {
                 UIUtils.mostrarInfo("Error API", "No se pudo eliminar la mascota:\n" + e.getMessage());
             }
         }
+    }
+
+    private void gestionarVacunas() {
+        Mascota seleccionada = tablaMascotas.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            UIUtils.mostrarInfo("Vacunación", "Selecciona primero una mascota de la tabla.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Vacunación - " + seleccionada.getNombre());
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().getButtonTypes().add(
+                new ButtonType("_Cerrar", ButtonBar.ButtonData.CANCEL_CLOSE));
+        dialog.getDialogPane().setMinWidth(640);
+        dialog.getDialogPane().setMinHeight(520);
+        UIUtils.añadirIconoADialogo(dialog);
+
+        VacunacionController vacunacionCtrl = new VacunacionController(seleccionada);
+        ScrollPane scroll = new ScrollPane(vacunacionCtrl.crearPanel());
+        scroll.setFitToWidth(true);
+        dialog.getDialogPane().setContent(scroll);
+
+        dialog.showAndWait();
     }
 
     // --- Buscadores ---

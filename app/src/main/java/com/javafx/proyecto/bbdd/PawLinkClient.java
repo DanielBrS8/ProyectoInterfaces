@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class PawLinkClient {
 
-    private static final String BASE_URL = "http://localhost:8080";
+    private static final String BASE_URL = "http://localhost:8082";
     private static final String PATH_ALQUILERES = "/api/alquileres/";
     private static final HttpClient client = HttpClient.newHttpClient();
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -149,12 +149,6 @@ public class PawLinkClient {
         return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
     }
 
-    public static Map<String, Object> loginGoogle(String code) throws Exception {
-        Map<String, String> body = Map.of("code", code);
-        HttpResponse<String> response = post("/api/auth/google", body);
-        return mapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
-    }
-
     // -------------------------------------------------------------------------
     // Mascotas
     // -------------------------------------------------------------------------
@@ -251,6 +245,19 @@ public class PawLinkClient {
 
     public static void eliminarCentro(int id, String token) throws Exception {
         deleteAuth("/api/centros/" + id, token);
+    }
+
+    // -------------------------------------------------------------------------
+    // Vacunas
+    // -------------------------------------------------------------------------
+
+    public static List<Map<String, Object>> getVacunas(int idMascota, String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/mascotas/" + idMascota + "/vacunas", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public static void registrarVacuna(Map<String, Object> body, String token) throws Exception {
+        postAuth("/api/vacunas", body, token);
     }
 
     // -------------------------------------------------------------------------

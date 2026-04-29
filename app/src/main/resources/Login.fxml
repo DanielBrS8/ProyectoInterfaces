@@ -59,20 +59,6 @@
                     prefWidth="140"
                     prefHeight="35" />
 
-                <HBox alignment="CENTER" spacing="10">
-                    <children>
-                        <Separator prefWidth="80" />
-                        <Label text="o" style="-fx-text-fill: #6C757D;" />
-                        <Separator prefWidth="80" />
-                    </children>
-                </HBox>
-
-                <Button fx:id="btnGoogle"
-                    text="Iniciar con Google"
-                    onAction="#onGoogle"
-                    prefWidth="200"
-                    prefHeight="35"
-                    style="-fx-background-color: white; -fx-border-color: #DADCE0; -fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;" />
             </children>
         </VBox>
     </center>

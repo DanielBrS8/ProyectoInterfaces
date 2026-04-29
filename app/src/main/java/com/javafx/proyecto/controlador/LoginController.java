@@ -13,9 +13,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -23,8 +20,6 @@ import java.io.IOException;
 import java.util.Map;
 
 public class LoginController {
-
-    private static final String GOOGLE_CLIENT_ID = "164559908013-6mh8k2a5kc9729ou6ahvc0gpk60g8otr.apps.googleusercontent.com";
 
     @FXML
     private TextField txtEmail;
@@ -34,8 +29,6 @@ public class LoginController {
     private Label lblError;
     @FXML
     private Button btnEntrar;
-    @FXML
-    private Button btnGoogle;
     @FXML
     private VBox loginContainer;
     @FXML
@@ -115,88 +108,6 @@ public class LoginController {
             }
             txtEmail.getStyleClass().add("error");
             txtPassword.getStyleClass().add("error");
-            animarError();
-        } catch (Exception e) {
-            lblError.setText("Error de conexión con el servidor");
-            animarError();
-        }
-    }
-
-    @FXML
-    private void onGoogle() {
-        Stage dialogStage = new Stage();
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
-        dialogStage.initOwner(btnGoogle.getScene().getWindow());
-        dialogStage.setTitle("Iniciar sesión con Google");
-
-        WebView webView = new WebView();
-        WebEngine webEngine = webView.getEngine();
-
-        String authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
-                + "?client_id=" + GOOGLE_CLIENT_ID
-                + "&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
-                + "&response_type=code"
-                + "&scope=openid%20email%20profile";
-
-        webEngine.titleProperty().addListener((obs, oldTitle, newTitle) -> {
-            if (newTitle != null && newTitle.startsWith("Success code=")) {
-                String code = newTitle.substring("Success code=".length()).trim();
-                dialogStage.close();
-                procesarLoginGoogle(code);
-            }
-        });
-
-        webEngine.documentProperty().addListener((obs, oldDoc, newDoc) -> {
-            if (newDoc != null) {
-                String location = webEngine.getLocation();
-                if (location == null || !location.contains("approvalCode")) return;
-
-                String code = (String) webEngine.executeScript(
-                        "(function() {"
-                        + "  var el = document.getElementById('code');"
-                        + "  if (el) return (el.value || el.textContent || '').trim();"
-                        + "  var title = document.title || '';"
-                        + "  if (title.indexOf('code=') !== -1) return title.split('code=')[1].trim();"
-                        + "  return null;"
-                        + "})()"
-                );
-                if (code != null && !code.isEmpty() && code.startsWith("4/")) {
-                    dialogStage.close();
-                    procesarLoginGoogle(code);
-                }
-            }
-        });
-
-        webEngine.load(authUrl);
-
-        Scene scene = new Scene(webView, 500, 600);
-        dialogStage.setScene(scene);
-        dialogStage.showAndWait();
-    }
-
-    private void procesarLoginGoogle(String code) {
-        try {
-            if (code.contains("&")) {
-                code = code.substring(0, code.indexOf('&'));
-            }
-            Map<String, Object> respuesta = PawLinkClient.loginGoogle(code);
-            String rol = respuesta.get("rol") != null ? respuesta.get("rol").toString() : "";
-            if ("user".equalsIgnoreCase(rol)) {
-                lblError.setText("Acceso denegado. Esta aplicación es solo para personal del centro.");
-                animarError();
-                return;
-            }
-            SesionUsuario.getInstancia().iniciarSesion(respuesta);
-            animarExito();
-        } catch (RuntimeException e) {
-            String mensaje = e.getMessage();
-            if (mensaje != null && mensaje.contains("401")) {
-                lblError.setText("Usuario no autorizado");
-            } else if (mensaje != null && mensaje.contains("403")) {
-                lblError.setText("Acceso solo para administradores y veterinarios");
-            } else {
-                lblError.setText("Error de conexión con el servidor");
-            }
             animarError();
         } catch (Exception e) {
             lblError.setText("Error de conexión con el servidor");
