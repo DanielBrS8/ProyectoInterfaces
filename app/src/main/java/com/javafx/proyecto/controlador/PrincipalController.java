@@ -1,6 +1,5 @@
 package com.javafx.proyecto.controlador;
 
-import com.javafx.proyecto.bbdd.ConexionBBDD;
 import com.javafx.proyecto.modelo.AdopcionTabla;
 import com.javafx.proyecto.modelo.CentroVeterinario;
 import com.javafx.proyecto.modelo.Mascota;
@@ -29,7 +28,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -438,18 +436,10 @@ public class PrincipalController {
                 .count();
         lblAdopcionesActivas.setText(String.valueOf(activas));
 
-        // Usuarios activos: todavía vía JDBC (no hay endpoint en la API)
-        try (Connection conn = ConexionBBDD.getConexion()) {
-            String sqlUsuarios = "SELECT COUNT(*) FROM Usuarios WHERE activo = 1";
-            try (Statement st = conn.createStatement();
-                 ResultSet rsUsuarios = st.executeQuery(sqlUsuarios)) {
-                if (rsUsuarios.next()) {
-                    lblUsuariosActivos.setText(String.valueOf(rsUsuarios.getInt(1)));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error cargando dashboard usuarios: " + e.getMessage());
-        }
+        long activos = listaUsuarios.stream()
+                .filter(u -> Boolean.TRUE.equals(u.getActivo()))
+                .count();
+        lblUsuariosActivos.setText(String.valueOf(activos));
     }
 
     private void configurarTablaUltimos() {
@@ -470,47 +460,38 @@ public class PrincipalController {
 
     private void cargarUltimosRegistros() {
         if (tablaUltimos == null) return;
-
         listaUltimos.clear();
 
-        String sql = "SELECT descripcion, fecha FROM ("
-                + " SELECT CONCAT('Mascota: ', nombre, ' - ', raza) AS descripcion, fecha_nacimiento AS fecha "
-                + " FROM Mascotas "
-                + " UNION ALL "
-                + " SELECT CONCAT('Usuario: ', nombre, ' - ', email) AS descripcion, CURRENT_DATE AS fecha "
-                + " FROM Usuarios "
-                + " UNION ALL "
-                + " SELECT CONCAT('Adopción de ', m.nombre, ' - ', u.nombre) AS descripcion, a.fecha_inicio AS fecha "
-                + " FROM alquiler a "
-                + " JOIN mascotas m ON a.id_mascota = m.id_mascota "
-                + " JOIN Usuarios u ON a.id_voluntario = u.id_usuario "
-                + ") t "
-                + "ORDER BY fecha DESC "
-                + "LIMIT 5";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        java.util.List<java.util.AbstractMap.SimpleEntry<LocalDate, UltimoRegistro>> todos = new java.util.ArrayList<>();
 
-        try (Connection conn = ConexionBBDD.getConexion();
-                Statement st = conn.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
-
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            int contador = 0;
-
-            while (rs.next()) {
-                java.sql.Date fechaSql = rs.getDate("fecha");
-                String fechaStr = "";
-                if (fechaSql != null) {
-                    fechaStr = fechaSql.toLocalDate().format(fmt);
-                }
-
-                String desc = rs.getString("descripcion");
-                listaUltimos.add(new UltimoRegistro(desc, fechaStr));
-                contador++;
-            }
-            System.out.println("Últimos registros cargados: " + contador);
-
-        } catch (SQLException e) {
-            System.out.println("Error cargando últimos registros: " + e.getMessage());
+        for (Mascota m : listaMascotas) {
+            LocalDate fecha = m.getFechaNacimiento();
+            if (fecha == null) continue;
+            String desc = "Mascota: " + m.getNombre() + " - " + (m.getRaza() != null ? m.getRaza() : "");
+            todos.add(new java.util.AbstractMap.SimpleEntry<>(fecha, new UltimoRegistro(desc, fecha.format(fmt))));
         }
+
+        for (Usuario u : listaUsuarios) {
+            String raw = u.getFechaRegistro();
+            if (raw == null || raw.length() < 10) continue;
+            LocalDate fecha;
+            try { fecha = LocalDate.parse(raw.substring(0, 10)); } catch (Exception e) { continue; }
+            String desc = "Usuario: " + u.getNombre() + " - " + u.getEmail();
+            todos.add(new java.util.AbstractMap.SimpleEntry<>(fecha, new UltimoRegistro(desc, fecha.format(fmt))));
+        }
+
+        for (AdopcionTabla a : listaAdopciones) {
+            LocalDate fecha = a.getFechaInicio();
+            if (fecha == null) continue;
+            String desc = "Adopción de " + a.getMascota() + " - " + a.getVoluntario();
+            todos.add(new java.util.AbstractMap.SimpleEntry<>(fecha, new UltimoRegistro(desc, fecha.format(fmt))));
+        }
+
+        todos.stream()
+                .sorted((x, y) -> y.getKey().compareTo(x.getKey()))
+                .limit(5)
+                .forEach(e -> listaUltimos.add(e.getValue()));
 
         tablaUltimos.setItems(listaUltimos);
     }
