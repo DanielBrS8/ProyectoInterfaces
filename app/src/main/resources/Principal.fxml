@@ -123,12 +123,12 @@
                     </graphic>
                 </Button>
 
-                <Button fx:id="btnChatSoporte" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
-                    text="Chat _Soporte" mnemonicParsing="true">
+                <Button fx:id="btnMensajes" contentDisplay="TOP" prefHeight="60.0" prefWidth="150.0"
+                    text="_Mensajes" mnemonicParsing="true">
                     <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
                             <image>
-                                <Image url="@miapp/icons/paw.png" />
+                                <Image url="@miapp/icons/form.png" />
                             </image>
                         </ImageView>
                     </graphic>
@@ -231,7 +231,7 @@
 
             <AnchorPane fx:id="vistaUsuarios" visible="false">
                 <children>
-                    <Label fx:id="lblTituloUsuarios" text="Gestión de Veterinarios"
+                    <Label fx:id="lblTituloUsuarios" text="Gestión de Usuarios"
                         layoutX="30" layoutY="20"
                         style="-fx-font-size: 16px; -fx-font-weight: bold;" />
 
@@ -241,7 +241,7 @@
                                 prefWidth="180" editable="true" />
                             <ComboBox fx:id="comboBuscarUsuarioEmail" promptText="Buscar por email"
                                 prefWidth="180" editable="true" />
-                            <ComboBox fx:id="comboBuscarUsuarioTelefono" promptText="Buscar por teléfono"
+                            <ComboBox fx:id="comboBuscarUsuarioCentro" promptText="Buscar por centro"
                                 prefWidth="180" editable="true" />
                             <Button fx:id="btnLimpiarUsuarios" text="_Buscar" mnemonicParsing="true" />
                         </children>
@@ -256,13 +256,11 @@
                         layoutX="30" layoutY="140"
                         prefHeight="400" prefWidth="740">
                         <columns>
-                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="50" />
-                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="140" />
-                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="170" />
-                            <TableColumn fx:id="colUsuarioTelefono" text="Teléfono" prefWidth="100" />
-                            <TableColumn fx:id="colUsuarioDireccion" text="Dirección" prefWidth="160" />
-                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="60" />
-                            <TableColumn fx:id="colUsuarioFechaRegistro" text="Fecha Registro" prefWidth="130" />
+                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
+                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="200" />
+                            <TableColumn fx:id="colUsuarioCentro" text="Centro" prefWidth="200" />
+                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="80" />
                         </columns>
                     </TableView>
                 </children>
@@ -391,6 +389,12 @@
                         </columns>
                     </TableView>
                 </children>
+            </AnchorPane>
+
+            <AnchorPane fx:id="vistaMensajes" visible="false">
+                <fx:include source="ChatVeterinarioView.fxml"
+                    AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
             </AnchorPane>
 
             <AnchorPane fx:id="vistaInformes" visible="false">

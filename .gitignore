@@ -5,3 +5,7 @@
 build
 
 nul
+
+# Compiled Java bytecode
+*.class
+app/bin/

@@ -205,6 +205,15 @@ public class PawLinkClient {
     }
 
     // -------------------------------------------------------------------------
+    // Usuarios (accesible por admin y veterinario)
+    // -------------------------------------------------------------------------
+
+    public static List<Map<String, Object>> getUsuariosAll(String token) throws Exception {
+        HttpResponse<String> response = getAuth("/api/usuarios", token);
+        return mapper.readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    // -------------------------------------------------------------------------
     // Admin — Gestión de usuarios
     // -------------------------------------------------------------------------
 

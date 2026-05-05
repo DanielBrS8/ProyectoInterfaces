@@ -150,7 +150,11 @@ public class LoginController {
         scale.play();
     }
 
+    private boolean cargandoPrincipal = false;
+
     private void cargarVentanaPrincipal() {
+        if (cargandoPrincipal) return;
+        cargandoPrincipal = true;
         try {
             Stage stage = (Stage) btnEntrar.getScene().getWindow();
 

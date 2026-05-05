@@ -12,10 +12,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -23,11 +19,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -41,6 +33,7 @@ public class PrincipalController {
     @FXML private AnchorPane vistaAdopciones;
     @FXML private AnchorPane vistaInformes;
     @FXML private AnchorPane vistaCentros;
+    @FXML private AnchorPane vistaMensajes;
     @FXML private HBox barraCrud;
 
     // --- Botones de navegación ---
@@ -50,7 +43,7 @@ public class PrincipalController {
     @FXML private Button btnMascotas;
     @FXML private Button btnAdopciones;
     @FXML private Button btnInformes;
-    @FXML private Button btnChatSoporte;
+    @FXML private Button btnMensajes;
 
     // --- Botones CRUD ---
     @FXML private Button btnNuevo;
@@ -61,6 +54,7 @@ public class PrincipalController {
     @FXML private Label lblUsuariosActivos;
     @FXML private Label lblMascotasRegistradas;
     @FXML private Label lblAdopcionesActivas;
+    @FXML private Label lblTituloUsuarios;
     @FXML private Label lblErrorConexionUsuarios;
     @FXML private Label lblErrorConexionMascotas;
     @FXML private Label lblErrorConexionAdopciones;
@@ -75,18 +69,15 @@ public class PrincipalController {
     @FXML private NumberAxis ejeYEspecies;
 
     // --- Tabla Usuarios (Veterinarios) ---
-    @FXML private Label lblTituloUsuarios;
     @FXML private TableView<Usuario> tablaUsuarios;
     @FXML private TableColumn<Usuario, Integer> colUsuarioId;
     @FXML private TableColumn<Usuario, String> colUsuarioNombre;
     @FXML private TableColumn<Usuario, String> colUsuarioEmail;
-    @FXML private TableColumn<Usuario, String> colUsuarioTelefono;
-    @FXML private TableColumn<Usuario, String> colUsuarioDireccion;
+    @FXML private TableColumn<Usuario, String> colUsuarioCentro;
     @FXML private TableColumn<Usuario, Boolean> colUsuarioActivo;
-    @FXML private TableColumn<Usuario, String> colUsuarioFechaRegistro;
     @FXML private ComboBox<String> comboBuscarUsuarioNombre;
     @FXML private ComboBox<String> comboBuscarUsuarioEmail;
-    @FXML private ComboBox<String> comboBuscarUsuarioTelefono;
+    @FXML private ComboBox<String> comboBuscarUsuarioCentro;
     @FXML private Button btnLimpiarUsuarios;
 
     // --- Tabla Mascotas ---
@@ -160,7 +151,7 @@ public class PrincipalController {
     private AnchorPane vistaActual;
 
     private enum Seccion {
-        INICIO, USUARIOS, MASCOTAS, ADOPCIONES, INFORMES, CENTROS
+        INICIO, USUARIOS, MASCOTAS, ADOPCIONES, INFORMES, CENTROS, MENSAJES
     }
 
     private Seccion seccionActual = Seccion.INICIO;
@@ -171,10 +162,9 @@ public class PrincipalController {
         usuarioCtrl = new UsuarioCrudController(
                 tablaUsuarios, listaUsuarios,
                 colUsuarioId, colUsuarioNombre, colUsuarioEmail,
-                colUsuarioTelefono, colUsuarioDireccion,
-                colUsuarioActivo, colUsuarioFechaRegistro,
+                colUsuarioCentro, colUsuarioActivo,
                 comboBuscarUsuarioNombre, comboBuscarUsuarioEmail,
-                comboBuscarUsuarioTelefono,
+                comboBuscarUsuarioCentro,
                 btnLimpiarUsuarios, lblErrorConexionUsuarios,
                 this::recargarDashboard);
 
@@ -219,7 +209,7 @@ public class PrincipalController {
         btnAdopciones.setOnAction(e -> mostrarVista(vistaAdopciones, btnAdopciones, Seccion.ADOPCIONES));
         btnInformes.setOnAction(e -> mostrarVista(vistaInformes, btnInformes, Seccion.INFORMES));
         btnCentros.setOnAction(e -> mostrarVista(vistaCentros, btnCentros, Seccion.CENTROS));
-        btnChatSoporte.setOnAction(e -> abrirChatSoporte());
+        btnMensajes.setOnAction(e -> mostrarVista(vistaMensajes, btnMensajes, Seccion.MENSAJES));
 
         btnNuevo.setOnAction(e -> accionCrud("Nuevo"));
         btnEditar.setOnAction(e -> accionCrud("Editar"));
@@ -235,13 +225,18 @@ public class PrincipalController {
 
         configurarAnimaciones();
 
-        // Cargar datos
-        usuarioCtrl.cargarDatos();
-        mascotaCtrl.cargarDatos();
-        adopcionCtrl.cargarDatos();
-        centroCtrl.cargarDatos();
+        // Cargar datos según rol (la API restringe ciertos endpoints por rol)
+        SesionUsuario sesion = SesionUsuario.getInstancia();
+        if (sesion.isAdmin()) {
+            usuarioCtrl.cargarDatos();
+            centroCtrl.cargarDatos();
+        } else {
+            usuarioCtrl.cargarDatos();
+            mascotaCtrl.cargarDatos();
+            adopcionCtrl.cargarDatos();
+            mascotaCtrl.rellenarGraficaEspecies();
+        }
         cargarDatosDashboard();
-        mascotaCtrl.rellenarGraficaEspecies();
         cargarUltimosRegistros();
 
         // Configurar visibilidad según rol
@@ -254,20 +249,22 @@ public class PrincipalController {
         SesionUsuario sesion = SesionUsuario.getInstancia();
 
         if (sesion.isAdmin()) {
-            // Admin gestiona veterinarios y centros
+            lblTituloUsuarios.setText("Gestión de Veterinarios");
+            // Admin crea veterinarios (usuarios) y gestiona centros — no ve mascotas/adopciones/informes/mensajes
             btnMascotas.setVisible(false);
             btnMascotas.setManaged(false);
             btnAdopciones.setVisible(false);
             btnAdopciones.setManaged(false);
             btnInformes.setVisible(false);
             btnInformes.setManaged(false);
-            if (lblTituloUsuarios != null) lblTituloUsuarios.setText("Gestión de Veterinarios");
+            btnMensajes.setVisible(false);
+            btnMensajes.setManaged(false);
             mostrarVista(vistaUsuarios, btnUsuarios, Seccion.USUARIOS);
         } else {
-            // Veterinario ve mascotas, adopciones, informes y usuarios normales — no centros
+            lblTituloUsuarios.setText("Gestión de Usuarios");
+            // Veterinario gestiona mascotas/adopciones/informes y puede crear usuarios — no ve centros
             btnCentros.setVisible(false);
             btnCentros.setManaged(false);
-            if (lblTituloUsuarios != null) lblTituloUsuarios.setText("Gestión de Usuarios");
             mostrarVista(vistaInicio, btnInicio, Seccion.INICIO);
         }
     }
@@ -279,6 +276,7 @@ public class PrincipalController {
         vistaAdopciones.setVisible(false);
         vistaInformes.setVisible(false);
         vistaCentros.setVisible(false);
+        vistaMensajes.setVisible(false);
 
         vista.setVisible(true);
         vista.toFront();
@@ -335,6 +333,7 @@ public class PrincipalController {
         btnAdopciones.setStyle(normal);
         btnInformes.setStyle(normal);
         btnCentros.setStyle(normal);
+        btnMensajes.setStyle(normal);
 
         if (activo != null) {
             activo.setStyle(seleccionado);
@@ -347,7 +346,7 @@ public class PrincipalController {
         barraCrud.setVisible(true);
         barraCrud.setManaged(true);
 
-        if (seccionActual == Seccion.INICIO) {
+        if (seccionActual == Seccion.INICIO || seccionActual == Seccion.MENSAJES) {
             btnNuevo.setVisible(false);
             btnEditar.setVisible(false);
             btnEliminar.setVisible(false);
@@ -505,44 +504,9 @@ public class PrincipalController {
         UIUtils.configurarHoverBoton(btnAdopciones);
         UIUtils.configurarHoverBoton(btnInformes);
         UIUtils.configurarHoverBoton(btnCentros);
-        UIUtils.configurarHoverBoton(btnChatSoporte);
+        UIUtils.configurarHoverBoton(btnMensajes);
         UIUtils.configurarHoverBoton(btnNuevo);
         UIUtils.configurarHoverBoton(btnEditar);
         UIUtils.configurarHoverBoton(btnEliminar);
-    }
-
-    private Stage chatStage;
-
-    private void abrirChatSoporte() {
-        if (chatStage != null && chatStage.isShowing()) {
-            chatStage.toFront();
-            chatStage.requestFocus();
-            return;
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ChatVeterinarioView.fxml"));
-            Parent root = loader.load();
-            ChatVeterinarioController chatCtrl = loader.getController();
-
-            chatStage = new Stage();
-            chatStage.setTitle("Chat Soporte - PawLink");
-            chatStage.getIcons().add(
-                    new Image(getClass().getResourceAsStream("/miapp/icons/paw.png")));
-            chatStage.setScene(new Scene(root));
-            chatStage.initOwner(btnChatSoporte.getScene().getWindow());
-            chatStage.initModality(Modality.NONE);
-            chatStage.setResizable(true);
-
-            chatStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
-                chatCtrl.cerrarConexion();
-                chatStage = null;
-            });
-
-            chatStage.show();
-        } catch (IOException e) {
-            UIUtils.mostrarInfo("Chat Soporte",
-                    "No se pudo abrir la ventana de chat: " + e.getMessage());
-        }
     }
 }
