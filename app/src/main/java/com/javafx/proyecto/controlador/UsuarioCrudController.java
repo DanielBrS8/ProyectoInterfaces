@@ -26,7 +26,10 @@ public class UsuarioCrudController {
     private final TableColumn<Usuario, Integer> colUsuarioId;
     private final TableColumn<Usuario, String> colUsuarioNombre;
     private final TableColumn<Usuario, String> colUsuarioEmail;
+    private final TableColumn<Usuario, String> colUsuarioTelefono;
+    private final TableColumn<Usuario, String> colUsuarioRol;
     private final TableColumn<Usuario, String> colUsuarioCentro;
+    private final TableColumn<Usuario, String> colUsuarioFechaRegistro;
     private final TableColumn<Usuario, Boolean> colUsuarioActivo;
 
     private final ComboBox<String> comboBuscarUsuarioNombre;
@@ -47,7 +50,10 @@ public class UsuarioCrudController {
             TableColumn<Usuario, Integer> colUsuarioId,
             TableColumn<Usuario, String> colUsuarioNombre,
             TableColumn<Usuario, String> colUsuarioEmail,
+            TableColumn<Usuario, String> colUsuarioTelefono,
+            TableColumn<Usuario, String> colUsuarioRol,
             TableColumn<Usuario, String> colUsuarioCentro,
+            TableColumn<Usuario, String> colUsuarioFechaRegistro,
             TableColumn<Usuario, Boolean> colUsuarioActivo,
             ComboBox<String> comboBuscarUsuarioNombre,
             ComboBox<String> comboBuscarUsuarioEmail,
@@ -61,7 +67,10 @@ public class UsuarioCrudController {
         this.colUsuarioId = colUsuarioId;
         this.colUsuarioNombre = colUsuarioNombre;
         this.colUsuarioEmail = colUsuarioEmail;
+        this.colUsuarioTelefono = colUsuarioTelefono;
+        this.colUsuarioRol = colUsuarioRol;
         this.colUsuarioCentro = colUsuarioCentro;
+        this.colUsuarioFechaRegistro = colUsuarioFechaRegistro;
         this.colUsuarioActivo = colUsuarioActivo;
         this.comboBuscarUsuarioNombre = comboBuscarUsuarioNombre;
         this.comboBuscarUsuarioEmail = comboBuscarUsuarioEmail;
@@ -81,7 +90,10 @@ public class UsuarioCrudController {
         colUsuarioId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colUsuarioNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colUsuarioEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colUsuarioTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        colUsuarioRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
         colUsuarioCentro.setCellValueFactory(new PropertyValueFactory<>("nombreCentro"));
+        colUsuarioFechaRegistro.setCellValueFactory(new PropertyValueFactory<>("fechaRegistro"));
         colUsuarioActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
     }
 
@@ -144,8 +156,13 @@ public class UsuarioCrudController {
                 Boolean activo = activoRaw instanceof Boolean ? (Boolean) activoRaw
                         : activoRaw != null && ((Number) activoRaw).intValue() == 1;
                 String nombreCentro = (String) u.get("nombreCentro");
+                String telefono = (String) u.get("telefono");
+                String fechaRegistro = (String) u.get("fechaRegistro");
 
-                listaUsuarios.add(new Usuario(id, nombre, email, activo, rol, nombreCentro));
+                Usuario usuario = new Usuario(id, nombre, email, activo, rol, nombreCentro);
+                usuario.setTelefono(telefono);
+                usuario.setFechaRegistro(fechaRegistro);
+                listaUsuarios.add(usuario);
             }
             UIUtils.ocultarErrorConexion(lblErrorConexionUsuarios);
 

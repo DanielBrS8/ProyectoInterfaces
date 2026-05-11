@@ -47,7 +47,7 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <Separator orientation="VERTICAL" />
+                <Separator fx:id="separadorAdopciones" orientation="VERTICAL" visible="false" managed="false" />
                 <Button fx:id="btnGestionarAdopciones" text="Gestionar adopciones" contentDisplay="TOP"
                     visible="false" managed="false"
                     style="-fx-background-color: #0078d4; -fx-text-fill: white; -fx-font-weight: bold;">
@@ -266,13 +266,16 @@
 
                     <TableView fx:id="tablaUsuarios"
                         layoutX="30" layoutY="140"
-                        prefHeight="400" prefWidth="740">
+                        prefHeight="400" prefWidth="860">
                         <columns>
-                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="60" />
-                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="180" />
-                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="200" />
-                            <TableColumn fx:id="colUsuarioCentro" text="Centro" prefWidth="200" />
-                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="80" />
+                            <TableColumn fx:id="colUsuarioId" text="ID" prefWidth="50" />
+                            <TableColumn fx:id="colUsuarioNombre" text="Nombre" prefWidth="150" />
+                            <TableColumn fx:id="colUsuarioEmail" text="Email" prefWidth="180" />
+                            <TableColumn fx:id="colUsuarioTelefono" text="Teléfono" prefWidth="110" />
+                            <TableColumn fx:id="colUsuarioRol" text="Rol" prefWidth="90" />
+                            <TableColumn fx:id="colUsuarioCentro" text="Centro" prefWidth="150" />
+                            <TableColumn fx:id="colUsuarioFechaRegistro" text="Registro" prefWidth="100" />
+                            <TableColumn fx:id="colUsuarioActivo" text="Activo" prefWidth="70" />
                         </columns>
                     </TableView>
                 </children>

@@ -51,6 +51,7 @@ public class PrincipalController {
     @FXML private Button btnEditar;
     @FXML private Button btnEliminar;
     @FXML private Button btnGestionarAdopciones;
+    @FXML private Separator separadorAdopciones;
 
     // --- Dashboard ---
     @FXML private Label lblUsuariosActivos;
@@ -75,7 +76,10 @@ public class PrincipalController {
     @FXML private TableColumn<Usuario, Integer> colUsuarioId;
     @FXML private TableColumn<Usuario, String> colUsuarioNombre;
     @FXML private TableColumn<Usuario, String> colUsuarioEmail;
+    @FXML private TableColumn<Usuario, String> colUsuarioTelefono;
+    @FXML private TableColumn<Usuario, String> colUsuarioRol;
     @FXML private TableColumn<Usuario, String> colUsuarioCentro;
+    @FXML private TableColumn<Usuario, String> colUsuarioFechaRegistro;
     @FXML private TableColumn<Usuario, Boolean> colUsuarioActivo;
     @FXML private ComboBox<String> comboBuscarUsuarioNombre;
     @FXML private ComboBox<String> comboBuscarUsuarioEmail;
@@ -164,7 +168,8 @@ public class PrincipalController {
         usuarioCtrl = new UsuarioCrudController(
                 tablaUsuarios, listaUsuarios,
                 colUsuarioId, colUsuarioNombre, colUsuarioEmail,
-                colUsuarioCentro, colUsuarioActivo,
+                colUsuarioTelefono, colUsuarioRol,
+                colUsuarioCentro, colUsuarioFechaRegistro, colUsuarioActivo,
                 comboBuscarUsuarioNombre, comboBuscarUsuarioEmail,
                 comboBuscarUsuarioCentro,
                 btnLimpiarUsuarios, lblErrorConexionUsuarios,
@@ -359,6 +364,8 @@ public class PrincipalController {
         boolean esAdopciones = seccionActual == Seccion.ADOPCIONES;
         btnGestionarAdopciones.setVisible(esAdopciones);
         btnGestionarAdopciones.setManaged(esAdopciones);
+        separadorAdopciones.setVisible(esAdopciones);
+        separadorAdopciones.setManaged(esAdopciones);
 
         if (seccionActual == Seccion.INICIO || seccionActual == Seccion.MENSAJES) {
             btnNuevo.setVisible(false);
