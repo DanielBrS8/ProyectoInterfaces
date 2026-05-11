@@ -47,6 +47,18 @@
                         </ImageView>
                     </graphic>
                 </Button>
+                <Separator orientation="VERTICAL" />
+                <Button fx:id="btnGestionarAdopciones" text="Gestionar adopciones" contentDisplay="TOP"
+                    visible="false" managed="false"
+                    style="-fx-background-color: #0078d4; -fx-text-fill: white; -fx-font-weight: bold;">
+                    <graphic>
+                        <ImageView fitHeight="31.0" fitWidth="31.0" preserveRatio="true">
+                            <image>
+                                <Image url="@miapp/icons/form.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
             </children>
         </HBox>
     </top>

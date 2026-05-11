@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.stage.Stage;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
@@ -49,6 +50,7 @@ public class PrincipalController {
     @FXML private Button btnNuevo;
     @FXML private Button btnEditar;
     @FXML private Button btnEliminar;
+    @FXML private Button btnGestionarAdopciones;
 
     // --- Dashboard ---
     @FXML private Label lblUsuariosActivos;
@@ -214,6 +216,14 @@ public class PrincipalController {
         btnNuevo.setOnAction(e -> accionCrud("Nuevo"));
         btnEditar.setOnAction(e -> accionCrud("Editar"));
         btnEliminar.setOnAction(e -> accionCrud("Eliminar"));
+        btnGestionarAdopciones.setOnAction(e -> {
+            Stage owner = tablaAdopciones.getScene() != null
+                    ? (Stage) tablaAdopciones.getScene().getWindow() : null;
+            SolicitudesAdopcionController.abrir(owner, listaMascotas, listaUsuarios, () -> {
+                adopcionCtrl.cargarDatos();
+                recargarDashboard();
+            });
+        });
 
         // Configurar sub-controladores
         informesCtrl.configurar();
@@ -345,6 +355,10 @@ public class PrincipalController {
 
         barraCrud.setVisible(true);
         barraCrud.setManaged(true);
+
+        boolean esAdopciones = seccionActual == Seccion.ADOPCIONES;
+        btnGestionarAdopciones.setVisible(esAdopciones);
+        btnGestionarAdopciones.setManaged(esAdopciones);
 
         if (seccionActual == Seccion.INICIO || seccionActual == Seccion.MENSAJES) {
             btnNuevo.setVisible(false);
